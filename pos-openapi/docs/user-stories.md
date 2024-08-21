@@ -1,0 +1,20 @@
+- As a guest
+  - Have the choice to signup or place an order anonymously
+  - Given that I have created an account, I can modify my account details
+  - Given that I have created an account, I can delete my account
+  - Future: Schedule an order in advance
+- As a station chef
+  - View partial orders specific to my station
+  - I want to be able to priortize dishes
+  - Mark order status as in progress or complete
+- As an expeditor
+  - View complete orders with dishes from all stations
+  - Modify an order
+    - If the customer wants to make a change
+    - Mark Ready for Pickup (available only to expeditor role)
+- Admin
+  - They use that API directly or React admin dashboard to do the following for the POS engine.
+  - Menus
+  - Categories
+  - Dishes
+  - Ingredients
