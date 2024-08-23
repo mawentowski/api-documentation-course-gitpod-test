@@ -1,5 +1,3 @@
-# Slides ignores:
-
 .idea/
 *.iml
 *.iws
@@ -11,3 +9,10 @@ log/*.log
 tmp/**
 node_modules/
 .sass-cache
+.swagger-codegen
+package-lock.json
+.DS_Store
+personal
+input.json
+input.yaml
+.vite

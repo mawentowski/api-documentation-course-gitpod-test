@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
   api-server:
     build:
-      context: ./pos-engine
+      context: ./server
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     volumes:
-      - ./pos-engine:/app
+      - ./server:/app
     depends_on:
       - pos-db
   prism-proxy:
@@ -17,7 +15,7 @@ services:
       ports:
         - "4010:4010"
       volumes:
-        - ./pos-engine/api:/api
+        - ./server/api:/api
       depends_on:
         - api-server
   swagger-editor:
@@ -28,7 +26,7 @@ services:
       - PORT=8000
       - SWAGGER_FILE=/api/openapi.yml
     volumes:
-      - ./pos-openapi/api:/api
+      - ./design/api:/api
   swagger-ui:
     image: swaggerapi/swagger-ui
     ports:
@@ -37,7 +35,7 @@ services:
       - PORT=5500
       - SWAGGER_JSON=/api/openapi.yml
     volumes:
-      - ./pos-openapi/api:/api
+      - ./design/api:/api
   pos-db:
     image: mongo
     ports:

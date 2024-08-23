@@ -1,369 +1,272 @@
-Incorporate Mermaid:
-https://github.com/mermaidjs/mermaid-live-editor
+# API Documentation Course
 
-todo:
-open spec add server pointing to proxxy server
-Documentation website load
-Mock server
-basic client
-restaurant pos app
-docker container where can run curl requests
+Welcome to the API Documentation course! This repository contains everything you need to test and document the course API.
 
-## API Documentation Course
+## About This Repository
 
-```shell
-# will also build if local images not there, otherwise it will build from local images
-docker-compose up
-docker-compose down
-# this is to rebuild images, rarely need
-docker-compose up --build
+This repository serves as a local API development environment, providing all the necessary components to develop, test, and debug an API on your machine. Here, you'll find everything you need to work with the course API—referred to as the POS API (Point-of-Sale API). The repository includes a frontend interface, an API server, and a MongoDB database, along with other essential tools.
 
-# restart one container, handle if make a change locally
-docker restart api-documentation-course-swagger-editor-1
+As we progress through the course, you'll interact with various parts of this repository.
 
+## Table of Contents
+
+- [API Documentation Course](#api-documentation-course)
+  - [About This Repository](#about-this-repository)
+  - [Table of Contents](#table-of-contents)
+  - [Join the Discord Server](#join-the-discord-server)
+  - [Getting Help](#getting-help)
+  - [System Privileges and Course Setup](#system-privileges-and-course-setup)
+  - [Required Software for the Course](#required-software-for-the-course)
+  - [Set up your Development Environment](#set-up-your-development-environment)
+  - [Configuring Visual Studio Code](#configuring-visual-studio-code)
+  - [Cloning the Repository](#cloning-the-repository)
+  - [Project Directory Structure](#project-directory-structure)
+  - [Creating Your Personal Directory](#creating-your-personal-directory)
+  - [Running the Setup Script](#running-the-setup-script)
+  - [Verifying Docker Containers](#verifying-docker-containers)
+  - [Running Course Slides](#running-course-slides)
+  - [Running Admin Panel](#running-admin-panel)
+  - [Pulling Changes](#pulling-changes)
+  - [Soliciting Reviews](#soliciting-reviews)
+  - [Postman Setup](#postman-setup)
+  - [Checklist](#checklist)
+
+## Join the Discord Server
+
+Join the course [Discord server](https://discord.gg/qT3enBuZ) for support and to ask questions as you set up your environment.
+
+You'll be prompted to create an account if you don't have one already.
+
+Head on over to the [# welcome](https://discord.com/channels/1278288408795549716/1278583957600079924) channel and introduce yourself!
+
+If you have trouble joining the Discord server, please email [mark.wentowski@docsgeek.io](mailto:mark.wentowski@docsgeek.io).
+
+## Getting Help
+
+For any questions or issues, visit the course Discord server. Different channels are available for various topics.
+
+Post your inquiry in the channel that best matches your issue. Note there are three key sections: one for software-related issues and two others dedicated to setting up a development environment on Windows or Mac, respectively.
+
+As you follow the README instructions, you'll be guided on which support topic to post in if you run into any issues.
+
+When posting an issue, please use the following template:
+
+```markdown
+**Issue Title:**
+Provide a concise title for your issue.
+
+**Operating System**:
+Specify your operating system (Windows/Mac/Linux). If you are posting to an OS-specific channel, then you can omit this information.
+
+**OS Version:**
+Indicate the specific release or version of your operating system.
+
+**Type of computer:**
+Is this a personal or work computer?
+
+**Description:**
+Give a detailed description of the issue. Include steps to replicate the problem, any error messages (you can copy from the terminal), and relevant screenshots if possible.
 ```
 
-Log openapi into swagger editor.
+## System Privileges and Course Setup
 
-<!-- ## Update postman
+To fully participate in the course, it's essential that you have administrative privileges on the machine you’re using. These privileges allow you to install software, run scripts, execute commands, and set up development environments. Many work computers, especially those not configured for developers, restrict these capabilities. Therefore, it’s highly recommended to use a personal computer for the course to ensure you can complete all tasks without restrictions.
 
-Find docker host IP:
+If you only have access to a work computer while taking the course, send an email to [mark.wentowski@docsgeek.io](mailto:mark.wentowski@docsgeek.io) to discuss the available options.
 
-```shell
-docker info
-``` -->
+**Note:** You only need a personal computer to complete the course exercises. A personal computer is not required during the training sessions where you'll only be viewing a presentation.
 
-## Manual instructions
+## Required Software for the Course
 
-# README
+Search for these software applications on Google and download them:
 
-## Prerequisites
+- Discord
+- Visual Studio Code
+- Postman
+- Google Chrome
+- Docker Desktop
 
-## Swagger Editor
+If you are having trouble installing software, post to the channel dedicated to the software. For example, for Visual Studio Code issues, post to the **Support - Software** > [# visual-studio-code](https://discord.com/channels/1278288408795549716/1278305356530843698) channel.
 
-https://hub.docker.com/r/stoplight/prism
+## Set up your Development Environment
 
-```shell
-npm i swagger-editor
-```
+Follow the instructions for your operating system:
 
-### Install Prism
+- [Windows Setup](./docs/windows-setup.md)
+- [Mac Setup](./docs/mac-setup.md)
 
-View docker docs:
-https://hub.docker.com/r/stoplight/prism
+Return to this README after completing those instructions.
 
-```shell
-docker pull stoplight/prism
-docker run --init --rm -v $(pwd):/tmp -p 4010:4010 stoplight/prism:4 mock -h 0.0.0.0 "/tmp/openapi.yml"
-```
+If you encounter any issues, post your issue to the channel most closely related to your issue.
 
-Docker compose:
+For example:
 
-Use prism as part of a docker compose file to aid development environment portability:
+- **Windows:** If you are Windows are are having trouble installing Git Bash, post to the **SUPPORT - WINDOWS** > [# git-gitbash] channel.
+- **Mac:** If you on Mac and cannot install Xcode, post to the **Support - Mac** > [# xcode](https://discord.com/channels/1278288408795549716/1278301960247971982) channel.
 
-```shell
-version: '3.9'
-services:
-  prism:
-    image: stoplight/prism:4
-    command: 'mock -h 0.0.0.0 /tmp/api.oas3.yml'
-    volumes:
-      - ./api.oas3.yml:/tmp/api.oas3.yml:ro
-    ports:
-      # Serve the mocked API locally as available on port 8080
-      - '8080:4010'
-```
+Remember to follow the issue template in the [Getting Help](#getting-help) section of this README.
 
-Local:
+## Configuring Visual Studio Code
 
-```shell
-npm install --global @stoplight/prism-cli
-# Print usage info for testing
-prism --help
-```
+1. Open Visual Studio Code.
+1. Click the **Extensions** tab and search for the following extensions, then install them:
 
-### Run Swagger UI
+- Prettier (code formatter)
+- ESLint (linter for JavaScript)
+- Git Graph (visualize your Git commit history)
 
-https://hub.docker.com/r/stoplight/prism
+## Cloning the Repository
 
-Pull the docker image:
+**Prerequisite:** Ensure you've set up SSH per the instructions in the [Windows](./docs/windows-setup.md) or [Mac](./docs/mac-setup.md) setup documentation.
+
+From this GitHub repository:
+
+1. Select the SSH option and copy the repository URL.
+2. Open Visual Studio Code (if not already open).
+3. Open a terminal (for Windows, ensure it's a Git Bash terminal). Do this by clicking **Terminal** at the top and selecting **New Terminal**.
+4. Clone the repository by typing the following command, replacing the URL with the one you copied:
 
 ```shell
-docker pull swaggerapi/swagger-ui
+git clone git@github.com:gh-username/api-documentation-course.git
 ```
 
-With the command below, the current working directory ($(pwd)) on the host machine will be mounted to the /tmp directory inside the container. This allows you to access files in your local working directory from within the container. The Swagger UI running inside the container can then access the Swagger/OpenAPI specification file (`openapi.yml`) located in the mounted directory.
+5. With a terminal open, change directories to the repo by running:
 
 ```shell
-docker run -d -p 8000:8000 -e PORT=8000 -v $(pwd):/tmp -e SWAGGER_JSON=/tmp/openapi.yml  swaggerapi/swagger-ui
+cd api-documentation-course
 ```
 
-### Run Swagger Editor
+If cloning failed, check the terminal for error messages. If it mentions access rights, ensure you properly set up SSH by revisiting the setup documentation for Windows or Mac. If you are struggling to resolve the issue, you can post to one of the following support channels depending on your OS:
 
-To use the docker image in DockerHub:
+- **Support - Windows** > [# git-gitbash](https://discord.com/channels/1278288408795549716/1278295713742061579)
+- **Support - Mac / Linux** > [# git](https://discord.com/channels/1278288408795549716/1278303208455798866)
+
+If there were no issues, continue to the next section.
+
+## Project Directory Structure
+
+Take a moment to review the high-level folders/files of project and their purpose:
+
+```sh
+api-documentation-course/
+┣ .vscode/              # Contains VS Code configurations and settings
+┣ admin/                # React-based admin portal (frontend UI for the API)
+┣ design/               # Source OpenAPI spec and other design artifacts
+┣ docs/                 # Documentation specific to setting up the repository
+┣ formatter/            # Tool for converting JSON to YAML and vice versa
+┣ personal/             # Personal directory for storing untracked files
+┣ postman/              # Postman collection and environment files for API testing
+┣ scripts/              # Scripts used for setup automation
+┣ server/               # API implementation (backend server)
+┣ slides/               # Course slides, web-based presentations
+┣ .gitignore            # Specifies files and directories to ignore in Git
+┣ README.md             # Main setup instructions and links to specialized docs
+┣ docker-compose.yml    # Defines Docker services and orchestrates their setup
+┣ start.sh              # Script to automate repository setup and manage Docker containers
+```
+
+You might not fully understand every folder or file right now, but it's helpful to develop a basic familiarity for when instructions direct you to use specific tools in this repository.
+
+## Creating Your Personal Directory
+
+You shouldn't edit the files in this project, except for those in the `personal` directory. Create this directory off the root to store any files you'd like to keep untracked by Git.
+
+## Running the Setup Script
+
+The `setup.sh` script automates the setup of this repository by handling tasks like installing project dependencies, starting Docker, and seeding the database so the API has data ready for use.
+
+**Prerequisites:**
+
+- Ensure Docker Desktop is open, as the script contains Docker commands.
+
+1. Open a terminal (For Windows, a Git Bash terminal) in VS Code.
+1. Make the script executable and run it:
 
 ```shell
-docker pull swaggerapi/swagger-editor
+chmod +x setup.sh
+./setup.sh
 ```
 
-Run the following command to start a container based on the swaggerapi/swagger-editor image, and the Swagger Editor interface becomes accessible in your web browser at http://localhost. You can then edit your Swagger/OpenAPI specification file (swagger.json) using the Swagger Editor running inside the container. Any changes you make will be reflected in the mounted volume (./swagger.json) on your local filesystem.
+If the script fails or you encounter any error messages in the terminal, please copy the entire output and post it in the appropriate **Discord** channel based on your operating system:
+
+- [# windows-setup](https://discord.com/channels/1278288408795549716/1278591699186090028)
+- [# mac-setup](https://discord.com/channels/1278288408795549716/1278591744459669535)
+
+Optionally, read and report on the messages that were outputted to the terminal and note the ones where issues arose.
+
+## Verifying Docker Containers
+
+After running `setup.sh`, open Docker Desktop (if not already open) and navigate to the **Containers** tab. You should see a high-level container named `api-documentation-course`. Expand it to view the sub-containers.
+
+- Ensure each sub-container shows "Running" status.
+- Check that each port in the Port(s) column is a clickable URL. If any port isn't clickable or any container isn't running, reach out on Discord for help.
+
+If either two of the approve conditions are not met, please post your issue (using the template) to the [# docker](https://discord.com/channels/1278288408795549716/1278304522522988649) Discord channel.
+
+If all containers are running and the ports are clickable, you're good to go!
+
+## Running Course Slides
+
+This repository contains the slides the instructor uses to present the course.
+
+1. Open a _new_ terminal in VS Code (use Git Bash if you're on Windows).
+
+2. Run the following script:
+
+   ```shell
+   ./scripts/run-slides.sh
+   ```
+
+3. If the script runs successfully, a link to the slides will be displayed. Click the link or visit [http://localhost:8001](http://localhost:8001) to view the slides in your browser.
+
+**Tip:** Press `Escape` to view an overview of the slide sections, making navigation easier.
+
+When you're finished viewing the slides, stop the server by pressing `Ctrl + C` in the same terminal where you ran the script.
+
+## Running Admin Panel
+
+The Admin panel is a frontend CRUD (Create-Read-Update-Delete) application that uses the ocurse API on the backend to retrieve and manipulate data.
+
+1. Open a _new_ terminal in VS Code (use Git Bash if you're on Windows).
+
+2. Run the following script:
 
 ```shell
-# docker run -d -p 80:8080 -v $(pwd):/tmp -e SWAGGER_FILE=/tmp/openapi.yml swaggerapi/swagger-editor
-docker run -d -p 80:80 -e PORT=80 -v $(pwd):/tmp -e SWAGGER_FILE=/tmp/openapi.yml swaggerapi/swagger-editor
-
-# can create a script that makes running this simpler:
-# would need to stop the container.
-# docker run -d -p 80:80 -e PORT=80 -v $(pwd)/chapters:/tmp -e SWAGGER_FILE=/tmp/ch1.yml swaggerapi/swagger-editor
+./scripts/run-admin.sh
 ```
 
-This will run Swagger Editor (in detached mode) on port 80 on your machine, so you can open it by navigating to http://localhost in your browser.
+3. If the script runs successfully, a link to the Admin panel will be displayed. Click the link or visit [http://localhost:5173/](http://localhost:5173/) to view the admin panel in your browser.
 
-## Run mock server using Prism
+When you're finished viewing the slides, stop the server by pressing `Ctrl + C` in the same terminal where you ran the script.
 
-```shell
-prism mock -p 8080 ./openapi.yml
-prism proxy -p 4040 api/openapi.yaml http://localhost:8080/
+## Pulling Changes
+
+Occasionally, updates may be made to the repository, and you'll need to sync these changes with your local version. The instructor will notify you in the [# repo-updates](https://discord.com/channels/1278288408795549716/1278608354469609525) Discord channel with specific instructions on how to pull the latest changes.
+
+**Tip:** Keep an eye on the #repo-updates channel for announcements!
+
+## Soliciting Reviews
+
+The Discord server also includes a Get Feedback category where you can request feedback on your work. Each course exercise has its own channel under this category. Post a link to your work for others to review.
+
+## Postman Setup
+
+For detailed instructions on configuring Postman for this course, please refer to the [Postman Setup Guide](./docs/postman-setup.md).
+
+## Checklist
+
+To confirm that you’ve successfully set up everything, please post the following checklist items in [this channel](https://discord.com/channels/1278288408795549716/1278615668220100641) (add an `x` to each checkbox):
+
+```markdown
+- [x] Joined the Discord server
+- [x] Downloaded software
+- [x] Set up your development environment
+- [x] Configured Visual Studio Code
+- [x] Cloned the course repository
+- [x] Successfully ran the set up script
+- [x] Verified Docker containers are working
+- [x] Ran and viewed the Admin
+- [x] Set up and configured Postman
 ```
 
-## Mongo DB
-
-Start a mongo server instance
-
-```shell
-docker run --name pos-db -d -p 27017:27017 mongo:latest
-# pos-db-new is the name of the container
-docker run --name pos-db-new -d -p 3306:3306 mongo:latest
-```
-
-Docker-compose
-
-```yml
-# Use root/example as user/password credentials
-version: "3.1"
-
-services:
-  mongo:
-    image: mongo
-    ADD  MORE IN THE FILE
-```
-
-Install in API server
-npm install mongoose --save
-
-#### Going it the DB container
-
-Go into container
-
-```shell
-# list containers
-ps
-# add container ID
-docker exec -it dcaa3e60df81 bash
-
-
-
-```
-
-#### Add path to mongosh binary for session
-
-```shell
-export PATH="$PATH:/usr/bin/mongosh"
-# Connect via. Mongosh:
-mongosh # connects to mongodb://127.0.0.1:27017
-# Commands here: https://www.mongodb.com/developer/products/mongodb/cheat-sheet/#connect-via-
-show dbs
-# prints the current database
-db
-# use the pos-db.
-use <database_name>
-```
-
-DONT DO
-Alternatively add it to bash_profile/rc
-
-```shell
-# Go it current working directory and the bashrc should be there:
-cd ~
-ls
-# Add the Directory to PATH:
-echo 'export PATH="$PATH:/usr/bin/mongosh"' >> ~/.bashrc
-# Alternatively open the file with nano
-# install nano to edit bashrc later:
-apt-get install nano
-nano .bashrc
-source ~/.bashrc
-# test mongo cli:
-mongosh --version
-```
-
-=======
-
-Alternatively, provide the path to the mongo distributable in the command.
-
-#### Query the database
-
-```shell
-use my_database
-
-db.createCollection("users")
-
-db.users.insertOne({ name: "John Doe", age: 30 })
-
-db.users.find()
-
-db.users.updateOne({ name: "John Doe" }, { $set: { age: 31 } })
-
-db.users.find()
-
-db.users.deleteOne({ name: "John Doe" })
-
-db.users.find()
-
-show dbs
-```
-
-NoSQL booster for mongoDB:
-mongodb://localhost:27017
-
-### MYSQL DB
-
-```shell
-docker exec -it d94610e86026d84090e74daa2a6e1e9f0e2c1256b9de18277bd3b9860cad41fc bash
-export PATH="$PATH:/usr/bin/mariadb"
-
-
-
-# Connect via. Mongosh:
-mongosh # connects to mongodb://127.0.0.1:27017
-# Commands here: https://www.mongodb.com/developer/products/mongodb/cheat-sheet/#connect-via-
-show dbs
-# prints the current database
-db
-# use the pos-db.
-use <database_name>
-```
-
-## API Styleguide
-
-https://docs.stoplight.io/docs/spectral/674b27b261c3c-overview
-
-## Diagrams
-
-Install the Mermaid VS Code extension
-
-## Two way editor
-
-https://www.apicur.io/studio/docs/getting-started-using-docker
-
-## Try these two platform (docker compose)
-
-https://github.com/apicurio/apicurio-studio
-https://github.com/Apicurio/apicurio-studio/blob/master/distro/docker-compose/Readme.md
-
-<!-- Stoplight studio does have the styleguide and visual editor feature -->
-
-## Spectral rules / styleguide
-
-https://meta.stoplight.io/docs/spectral/674b27b261c3c-overview
-
-https://stoplight.io/api-style-guides-guidelines-and-best-practices?utm_source=github.com&utm_medium=referral&utm_campaign=github_repo_spectral&_ga=2.50481132.436312531.1713591071-444182859.1713563872
-
-
-
-## Email
-
-
-
-
-Congratulations on your purchase of the Mastering API Documentation - Live Virtual Training Course! 🎉
-
-This 6-part series runs every Friday from 03 October 2024 to 19 December 2024.  2024 Fall-Winter Class Schedule
-
-Each course session is approximately 90 minutes long, running from 10:00am to 11:30am PT. Please check your timezone here for local time. 
-
-## What you should do now
-
-BrightTALK is the webinar software we are using to run the course. 
-You need to Sign up for a BrightTALK account at https://www.brighttalk.com/. This saves your details to BrightTALK so you can register for the different classes of course on the platform (*more on that in  second)
-Each session has it's own URL that is both used to register for the class and also for you to access the class on the day of the class. You must register for each class indivudally by clicking the individual URLs below and clicking Reigster (signing in if you arent alreadyt signed in.) Once you register for a class, brighttalk remembers you signed up for it for your account.
-
-Class #1: 03 October 2024
-🔗 [Class #1 - Registeration and Day-of class link]: https://www.brighttalk.com/webcast/9273/620143
-Class #2: 17 October 2024
-🔗 [Class #2 - Registeration and Day-of class link]: https://www.brighttalk.com/webcast/9273/620185
-Class #2: 31 October 2024
-🔗 [Class #3 - Registeration and Day-of class link]: https://www.brighttalk.com/webcast/9273/620186
-Class #2: 14 November 2024
-🔗 [Class #4 - Registeration and Day-of class link]: https://www.brighttalk.com/webcast/9273/620195
-Class #2: 05 December 2024
-🔗 [Class #5 - Registeration and Day-of class link]: https://www.brighttalk.com/webcast/9273/620202
-Class #2: 19 December 2024
-🔗 [Class #6 - Registeration and Day-of class link]: https://www.brighttalk.com/webcast/9273/620203
-
-Remmeberr: The previous linkjs are ALSO the links that you will use to join the class the DAY OF THE CLASS.
-
-## What to expect coming up to the course
-
-Shortly before the course begins, you'll receieve an email with a link to a list of prerequisites to complete before attending the course, for example, download softrware, cloning course preositories, and accessing the coruse Discord chanenl where ytou can ask for help.
-
-Part of this package will be a passcode you must enter on the day of the first class to verify youi are a payiong custoemr. Passcodes fopr the toher classes will be sent porior to those class dates.
-
-Questions / Comments?
-Feel free to contact Mark with any questions or to request a refund:
-mark.wentowski@docsgeek.io
-
-
-
-======
-
-
-
-
-
-### Welcome to the Mastering API Documentation - Live Virtual Training Course! 🎉
-
-Thank you for purchasing our course! This 6-part series runs every Friday from October 3, 2024, to December 19, 2024.
-
-#### 2024 Fall-Winter Class Schedule
-
-Each session is approximately 90 minutes long, running from 10:00 am to 11:30 am PT. Please check your local timezone [here](https://www.timeanddate.com/worldclock/converter.html).
-
-#### What You Should Do Now
-
-We'll be using BrightTALK as our webinar platform. Please follow these steps to get started:
-
-1. **Sign Up for BrightTALK**: Create an account at [BrightTALK](https://www.brighttalk.com/). This will save your details so you can register for each session.
-
-2. **Register for Each Class**: Each session has a unique URL for registration and access. Click the links below to register and sign in if needed. BrightTALK will remember your registration.
-
-**Class #1: October 3, 2024**
-  🔗 [Registration and Access Link](https://www.brighttalk.com/webcast/9273/620143)
-
-**Class #2: October 17, 2024**
-  🔗 [Registration and Access Link](https://www.brighttalk.com/webcast/9273/620185)
-
-**Class #3: October 31, 2024**
-  🔗 [Registration and Access Link](https://www.brighttalk.com/webcast/9273/620186)
-
-**Class #4: November 14, 2024**
-  🔗 [Registration and Access Link](https://www.brighttalk.com/webcast/9273/620195)
-
-**Class #5: December 5, 2024**
-  🔗 [Registration and Access Link](https://www.brighttalk.com/webcast/9273/620202)
-
-**Class #6: December 19, 2024**
-  🔗 [Registration and Access Link](https://www.brighttalk.com/webcast/9273/620203)
-
-Remember: These links are also used to join the class on the day of the session.
-
-### What to Expect Leading Up to the Course
-
-Before the course begins, you'll receive an email with a list of prerequisites, including software downloads, cloning course repositories, and joining the course's Discord channel for help and discussions.
-
-This package will also include a passcode for verifying your enrollment on the first day. Additional passcodes for subsequent classes will be sent prior to each session.
-
-### Questions or Comments?
-
-If you have any questions or need assistance, feel free to contact Mark at:
-📧 mark.wentowski@docsgeek.io
+Once you’ve completed all items on the checklist, you’ll be ready for the next steps. Wait for further instructions from your instructor.

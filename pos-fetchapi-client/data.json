@@ -1,7 +1,0 @@
-{
-  "items": [
-    { "name": "Burger", "price": 9.99 },
-    { "name": "Fries", "price": 3.49 },
-    { "name": "Soda", "price": 1.99 }
-  ]
-}
