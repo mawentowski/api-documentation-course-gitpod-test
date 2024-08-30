@@ -1,0 +1,2504 @@
+openapi: 3.0.3
+info:
+  title: Point of Service (POS) API
+  version: '1.0'
+  description: 'REST API to be used to create tableside food ordering applications.'
+  contact:
+    email: mawentowski@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://localhost:4010/
+    description: Prism proxy server
+  - url: http://localhost:8080/
+    description: API server
+tags:
+  - name: Orders
+    description: Operations related to managing orders, including creation, modification, and status updates
+  - name: Dishes
+    description: Operations for managing dishes, including adding, updating, and deleting dishes
+  - name: Ingredients
+    description: Operations for managing ingredients used in dishes, including adding, updating, and deleting ingredients
+  - name: Menus
+    description: Operations for managing menus, which organize dishes into categories or sections
+  - name: Categories
+    description: Operations for categorizing dishes in menus, allowing for easy navigation and organization
+  - name: Users
+    description: Operations for managing user accounts, including registration, profile management, and authentication
+  - name: Auth
+    description: Operations for user authentication, including login, token refresh, and logout
+paths:
+  /orders:
+    post:
+      summary: Create an order
+      operationId: postOrder
+      description: |
+        This operation can be used to create an order when a patron places an order via a mobile app, tablet app, self-service kiosk, etc., depending on the API consumer's use case.
+      tags:
+        - Orders
+      security:
+        - AccessToken: []
+      responses:
+        '201':
+          description: |
+            Resource created successfully. The response body contains the newly created resource.
+
+            The server logic applies to the response body as follows:
+
+            - The default `priority` is `3` out of `5`, indicating medium priority. Restaurant staff may adjust the priority based on factors like preparation time.
+            - The `status` is set to `received`. Restaurant staff update the status as the order progresses toward completion.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      requestBody:
+        $ref: '#/components/requestBodies/CreateOrderRequest'
+    get:
+      summary: Get a list of orders
+      description: This operation retrieves a list of orders based on specified query parameters. It is commonly used to view the `status` and `priority` of orders on the current day or view historical orders for inventory and analytics purposes.
+      operationId: getOrderList
+      tags:
+        - Orders
+      parameters:
+        - name: sort
+          in: query
+          description: |
+            Sort fields in ascending or descending order. To sort ascending, postfix the field name with `:asc`. To sort descending, postfix the field name with `:desc`.
+          schema:
+            type: string
+          example: 'priority:asc'
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'table_number,status,priority'
+        - name: select
+          in: query
+          description: |
+            Selection filters to display resources matching the provided criteria. Use the format `fieldName.operator:value`.
+
+            **Basic Equality (eq):**
+            - For exact matches, use `eq:value`.
+
+            **Comparison Operators:**
+            - **Less Than (lt):** Use `lt:value`.
+            - **Less Than or Equal To (lte):** Use `lte:value`.
+            - **Greater Than (gt):** Use `gt:value`.
+            - **Greater Than or Equal To (gte):** Use `gte:value`.
+
+            Separate multiple filters with commas. Dates should be in `YYYY-MM-DD` format.
+          schema:
+            type: string
+            example: 'created_at.gte:2024-05-07,status.eq:in_progress'
+        - name: limit
+          in: query
+          description: |
+            Pagination filter for the maximum number of results to return in the response. If `limit` is used in conjunction with `offset`, then page-based pagination is applied.
+          schema:
+            type: integer
+            maximum: 30
+          example: 10
+        - name: offset
+          in: query
+          description: |
+            Offest-based pagination filter for the number of results to skip before displaying resources. A value of `0` will display resources from the beginning of the list. Only affects the response data if a `limit` value is set.
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  total_results:
+                    type: integer
+                    example: 20
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /orders/{order_id}:
+    get:
+      summary: Get an order's details
+      description: |
+        This operation retrieves detailed information about a specific order identified by its unique order ID.
+      operationId: getOrder
+      tags:
+        - Orders
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bcc'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: table_number,status,priority
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              # creating an order creates a Patron
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    put:
+      summary: Update an order
+      description: |
+        This operation updates an existing order with the provided data. You can modify the order's status, priority, and the list of dishes associated with it.
+      operationId: putOrder
+      tags:
+        - Orders
+      security:
+        - AccessToken: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bcd'
+          description: The unique identifier for the resource.
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateOrderRequest'
+      responses:
+        '200':
+          description: Resource updated successfully. The response body contains the updated resource.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  total_results:
+                    type: integer
+                    example: 1
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      summary: Delete an order
+      description: |
+        This operation deletes an existing order identified by its unique order ID.
+      operationId: deleteOrder
+      tags:
+        - Orders
+      security:
+        - AccessToken: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bca'
+          description: The unique identifier for the resource.
+      responses:
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /orders/{order_id}/dishes:
+    get:
+      summary: Retrieve dishes for an order
+      description: |
+        This operation retrieves a list of dishes belonging to a specific order. Each dish object returned contains detailed information about the dish and which ingredients are essential to preparing the dish.
+      operationId: getOrderDishes
+      tags:
+        - Orders
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bcb'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          schema:
+            type: string
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          example: 'name,description,price'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Dish'
+                  total_results:
+                    type: integer
+                    example: 1
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /dishes:
+    post:
+      summary: Create a dish
+      tags:
+        - Dishes
+      operationId: postDishes
+      security:
+        - AccessToken: []
+      description: |
+        This operation creates a new dish with the provided information. The `dish_id` returned in the response can be used to associate the dish with an order.
+
+        Each `ingredient_id` should refer to an ingredient currently in the system. For each ingredient, set the value of `is_essential` to `true` if the ingredient is required to prepare the dish. It's considered a best practice to ensure that each essential ingredient has a positive quantity. This helps determine if the dish should be selectable in the user interface.
+      requestBody:
+        $ref: '#/components/requestBodies/CreateDishRequest'
+      responses:
+        '201':
+          description: Resource created successfully. The response body contains the newly created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      summary: Get a list of dishes
+      description: |
+        This operation retrieves a list of dishes based on the specified criteria. You can sort the results, include specific properties, select dishes that match certain criteria, and paginate through the results.
+      operationId: getDishList
+      tags:
+        - Dishes
+      parameters:
+        - name: sort
+          in: query
+          description: |
+            Sort fields in ascending or descending order. To sort ascending, postfix the field name with `:asc`. To sort descending, postfix the field name with `:desc`.
+          schema:
+            type: string
+          example: 'name:asc'
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'name,price,station,ingredients'
+        - name: select
+          in: query
+          description: |
+            Selection filters to display resources matching the provided criteria. Use the format `fieldName.operator:value`. 
+            **Basic Equality (eq):**
+            - For exact matches, use `eq:value`.
+
+            **Comparison Operators:**
+            - **Less Than (lt):** Use `lt:value`.
+            - **Less Than or Equal To (lte):** Use `lte:value`.
+            - **Greater Than (gt):** Use `gt:value`.
+            - **Greater Than or Equal To (gte):** Use `gte:value`.
+
+            Separate multiple filters with commas. Dates should be in `YYYY-MM-DD` format.
+          schema:
+            type: string
+            example: 'price.lt:9.99'
+        - name: limit
+          in: query
+          description: |
+            Pagination filter for the maximum number of results to return in the response. If `limit` is used in conjunction with `offset`, then page-based pagination is applied.
+          schema:
+            type: integer
+            maximum: 30
+          example: 20
+        - name: offset
+          in: query
+          description: |
+            Offest-based pagination filter for the number of results to skip before displaying resources. A value of `0` will display resources from the beginning of the list. Only affects the response data if a `limit` value is set.
+          schema:
+            type: integer
+            example: 5
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Dish'
+                  total_results:
+                    type: integer
+                    example: 20
+                    description: The number of resources returned in the response.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /dishes/{dish_id}:
+    get:
+      summary: Get a dish's details
+      description: |
+        Retrieve detailed information about a specific dish identified by its unique dish ID.
+      operationId: getDish
+      tags:
+        - Dishes
+      parameters:
+        - name: dish_id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: '66294b2a4475a41f3e709bd1'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: name,description,price
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    put:
+      summary: Update a dish
+      operationId: putDish
+      tags:
+        - Dishes
+      security:
+        - AccessToken: []
+      description: |
+        This operation updates an existing dish with the provided data.
+      parameters:
+        - name: dish_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bce'
+          description: The unique identifier for the resource.
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateDishRequest'
+      responses:
+        '200':
+          description: Resource updated successfully. The response body contains the updated resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource.
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      summary: Delete a dish
+      description: This operation deletes an existing dish identified by its unique dish ID.
+      operationId: deleteDish
+      tags:
+        - Dishes
+      security:
+        - AccessToken: []
+      parameters:
+        - name: dish_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bd0'
+          description: The unique identifier for the resource.
+      responses:
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /dishes/{dish_id}/ingredients:
+    get:
+      summary: Get a dish's ingredients
+      description: This operation retrieves a list of ingredients belonging to a specific dish. Importantly, the `in_stock_qty` for a dish indicates how much of the ingredient is available.
+      operationId: getDishIngredients
+      tags:
+        - Dishes
+      parameters:
+        - name: dish_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bd2'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'name,in_stock_qty'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Ingredient'
+                  total_results:
+                    type: integer
+                    example: 1
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /ingredients:
+    post:
+      summary: Create an ingredient
+      description: |
+        This operation creates a new ingredient with the provided information. Set an initial quantity of the ingredient using the `in_stock_qty` field.
+            
+        The `ingredient_id` returned in the response can be used to associate the ingredient with a dish. The `in_stock_qty` can be used to track if the ingredient has a positive quantity.
+      operationId: postIngredient
+      tags:
+        - Ingredients
+      security:
+        - AccessToken: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateIngredientRequest'
+      responses:
+        '201':
+          description: |
+            Resource created successfully. The response body contains the newly created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      summary: Get a list of ingredients
+      description: This operation retrieves a list of ingredients based on the specified criteria. You can sort the results, include specific properties, select ingredients that match certain criteria, and paginate through the results.
+      operationId: getIngredientList
+      tags:
+        - Ingredients
+      parameters:
+        - name: sort
+          in: query
+          description: |
+            Sort fields in ascending or descending order. To sort ascending, postfix the field name with `:asc`. To sort descending, postfix the field name with `:desc`.
+          schema:
+            type: string
+          example: 'in_stock_qty:asc'
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'name,in_stock_qty'
+        - name: select
+          in: query
+          description: |
+            Selection filters to display resources matching the provided criteria. Use the format `fieldName.operator:value`.
+
+            **Basic Equality (eq):**
+            - For exact matches, use `eq:value`.
+
+            **Comparison Operators:**
+            - **Less Than (lt):** Use `lt:value`.
+            - **Less Than or Equal To (lte):** Use `lte:value`.
+            - **Greater Than (gt):** Use `gt:value`.
+            - **Greater Than or Equal To (gte):** Use `gte:value`.
+
+            Separate multiple filters with commas. Dates should be in `YYYY-MM-DD` format.
+          schema:
+            type: string
+            example: 'in_stock_qty.eq:0'
+        - name: limit
+          in: query
+          description: |
+            Pagination filter for the maximum number of results to return in the response. If `limit` is used in conjunction with `offset`, then page-based pagination is applied.
+          schema:
+            type: integer
+            maximum: 30
+          example: 20
+        - name: offset
+          in: query
+          description: |
+            Offest-based pagination filter for the number of results to skip before displaying resources. A value of `0` will display resources from the beginning of the list. Only affects the response data if a `limit` value is set.
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Ingredient'
+                  total_results:
+                    type: integer
+                    example: 1
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /ingredients/{ingredient_id}:
+    get:
+      summary: Get an ingredient's details
+      description: This operation retrieves information about a specific ingredient identified by its unique ingredient ID.
+      operationId: getIngredient
+      tags:
+        - Ingredients
+      parameters:
+        - name: ingredient_id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: '614d706b67c122001f35cc47'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'in_stock_qty,name'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    put:
+      summary: Update an ingredient
+      description: This operation updates an ingredient using the provided information. Using this operation, API consumers can update the `in_stock_qty` of ingredients when orders are placed.
+      operationId: putIngredient
+      tags:
+        - Ingredients
+      security:
+        - AccessToken: []
+      parameters:
+        - name: ingredient_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '617d2e09ec42e0001f41bf84'
+          description: The unique identifier for the resource.
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateIngredientRequest'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the updated resource.
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      summary: Delete an ingredient
+      description: This operation deletes an existing order identified by its unique order ID.
+      operationId: deleteIngredient
+      tags:
+        - Ingredients
+      security:
+        - AccessToken: []
+      parameters:
+        - name: ingredient_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '61c8c34bb02368001f8f0812'
+          description: The unique identifier for the resource.
+      responses:
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /menus:
+    post:
+      summary: Create a menu
+      description: This operation creates a new menu with the provided information.
+      operationId: postMenu
+      tags:
+        - Menus
+      security:
+        - AccessToken: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateMenuRequest'
+      responses:
+        '201':
+          description: Resource created successfully. The response body contains the newly created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      summary: Get a list of menus
+      description: This operation retrieves a list of menus based on the specified criteria.
+      operationId: getMenuList
+      tags:
+        - Menus
+      parameters:
+        - name: sort
+          in: query
+          description: |
+            Sort fields in ascending or descending order. To sort ascending, postfix the field name with `:asc`. To sort descending, postfix the field name with `:desc`.
+          schema:
+            type: string
+          example: 'name:asc'
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'name,category_ids'
+        - name: select
+          in: query
+          description: |
+            Selection filters to display resources matching the provided criteria. Use the format `fieldName.operator:value`.
+
+            **Basic Equality (eq):**
+            - For exact matches, use `eq:value`.
+
+            **Comparison Operators:**
+            - **Less Than (lt):** Use `lt:value`.
+            - **Less Than or Equal To (lte):** Use `lte:value`.
+            - **Greater Than (gt):** Use `gt:value`.
+            - **Greater Than or Equal To (gte):** Use `gte:value`.
+
+            Separate multiple filters with commas. Dates should be in `YYYY-MM-DD` format.
+          schema:
+            type: string
+            example: 'created_at.gt:2024-04-23,name.eq:dinner'
+        - name: limit
+          in: query
+          description: |
+            Pagination filter for the maximum number of results to return in the response. If `limit` is used in conjunction with `offset`, then page-based pagination is applied.
+          schema:
+            type: integer
+            maximum: 30
+          example: 20
+        - name: offset
+          in: query
+          description: |
+            Offest-based pagination filter for the number of results to skip before displaying resources. A value of `0` will display resources from the beginning of the list. Only affects the response data if a `limit` value is set.
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Menu'
+                  total_results:
+                    type: integer
+                    example: 1
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /menus/{menu_id}:
+    get:
+      summary: View a menu
+      description: This operation retrieves information about a menu identified by its unique menu ID.
+      operationId: getMenu
+      tags:
+        - Menus
+      parameters:
+        - name: menu_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '6220a6a8d01d24001f27d3ff'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'name,category_ids'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    put:
+      summary: Update a menu
+      description: This operation updates an existing menu with the provided data.
+      operationId: putMenu
+      tags:
+        - Menus
+      security:
+        - AccessToken: []
+      parameters:
+        - name: menu_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '62a26aa41c7c5c001f627a4f'
+          description: The unique identifier for the resource.
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateMenuRequest'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the updated resource.
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      summary: Delete a menu
+      description: This operation deletes an existing menu identified by its unique menu ID.
+      operationId: deleteMenu
+      tags:
+        - Menus
+      security:
+        - AccessToken: []
+      parameters:
+        - name: menu_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '6261c0e33e5cf4f29b4641c4'
+          description: The unique identifier for the resource.
+      responses:
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /menus/{menu_id}/categories:
+    get:
+      summary: View a menu's categories
+      description: This operation retrieves a list of categories belonging to a specific menu.
+      operationId: getMenuCategories
+      tags:
+        - Menus
+      parameters:
+        - name: menu_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '62f7c50e47410a001f512d4d'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'name,dish_ids'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /categories:
+    post:
+      summary: Create a category
+      description: |
+        This operation creates a new category with the provided information. Categories can be used to organize/group dishes in food ordering apps. For example, displaying tabs for each category. 
+
+        The `category_id` returned in the response can be used to associate the category with a menu.
+      operationId: postCategory
+      tags:
+        - Categories
+      security:
+        - AccessToken: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateCategoryRequest'
+      responses:
+        '201':
+          description: |
+            Resource created successfully. The response body contains the newly created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      summary: Get a list of categories
+      description: This operation retrieves a list of categories based on the specified criteria.
+      operationId: getCategoryList
+      tags:
+        - Categories
+      parameters:
+        - name: sort
+          in: query
+          description: |
+            Sort fields in ascending or descending order. To sort ascending, postfix the field name with `:asc`. To sort descending, postfix the field name with `:desc`.
+          schema:
+            type: string
+          example: 'name:asc'
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'name,dish_ids'
+        - name: select
+          in: query
+          description: |
+            Selection filters to display resources matching the provided criteria. Use the format `fieldName.operator:value`.
+
+            **Basic Equality (eq):**
+            - For exact matches, use `eq:value`.
+
+            **Comparison Operators:**
+            - **Less Than (lt):** Use `lt:value`.
+            - **Less Than or Equal To (lte):** Use `lte:value`.
+            - **Greater Than (gt):** Use `gt:value`.
+            - **Greater Than or Equal To (gte):** Use `gte:value`.
+
+            Separate multiple filters with commas. Dates should be in `YYYY-MM-DD` format.
+          schema:
+            type: string
+            example: 'created_at.gt:2024-04-23,name.eq:main_course'
+        - name: limit
+          in: query
+          description: |
+            Pagination filter for the maximum number of results to return in the response. If `limit` is used in conjunction with `offset`, then page-based pagination is applied.
+          schema:
+            type: integer
+            maximum: 30
+          example: 20
+        - name: offset
+          in: query
+          description: |
+            Offest-based pagination filter for the number of results to skip before displaying resources. A value of `0` will display resources from the beginning of the list. Only affects the response data if a `limit` value is set.
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+                  total_results:
+                    type: integer
+                    example: 1
+
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /categories/{category_id}:
+    get:
+      summary: Get a category's details
+      description: This operation retrieves information about a category identified by its unique category ID.
+      operationId: getCategory
+      tags:
+        - Categories
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '632a14b6d004f3001f12c8c8'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'name,dish_ids'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    put:
+      summary: Update a category
+      description: This operation updates an existing category with the provided data.
+      operationId: putCategory
+      tags:
+        - Categories
+      security:
+        - AccessToken: []
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '643e8ef8b5a1e8001f7ecb16'
+          description: The unique identifier for the resource.
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the updated resource.
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      summary: Delete a category
+      description: This operation deletes an existing category identified by its unique category ID.
+      operationId: deleteCategory
+      tags:
+        - Categories
+      security:
+        - AccessToken: []
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '63c896f844697e001f1a19c0'
+          description: The unique identifier for the resource.
+      responses:
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /categories/{category_id}/dishes:
+    get:
+      summary: View a category's dishes
+      description: This operation retrieves a list of dishes belonging to a specific category. Each dish object returned contains detailed information about the dish and which ingredients are essential to preparing the dish.
+      operationId: getCategoryDishes
+      tags:
+        - Categories
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '65bf24fc1f1b5c001f1d99fd'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Dish'
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /users:
+    post:
+      summary: Create a user account
+      description: This operation creates a new user with the provided information. The API server uses `role` to determine the the access rights of the user. The `email` field is used for password reset.
+      operationId: postUser
+      tags:
+        - Users
+      requestBody:
+        $ref: '#/components/requestBodies/CreateUserRequest'
+      responses:
+        '201':
+          description: Resource created successfully. The response body contains the newly created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      security: []
+    get:
+      summary: Get a list of users
+      description: This operation retrieves a list of users based on the specified criteria.
+      operationId: getAllUsers
+      tags:
+        - Users
+      parameters:
+        - name: sort
+          in: query
+          description: |
+            Sort fields in ascending or descending order. To sort ascending, postfix the field name with `:asc`. To sort descending, postfix the field name with `:desc`.
+          schema:
+            type: string
+          example: 'user_name:asc'
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'user_name,password'
+        - name: select
+          in: query
+          description: |
+            Selection filters to display resources matching the provided criteria. Use the format `fieldName.operator:value`. Note that the `email` field is not supported.
+
+            **Basic Equality (eq):**
+            - For exact matches, use `eq:value`.
+
+            **Comparison Operators:**
+            - **Less Than (lt):** Use `lt:value`.
+            - **Less Than or Equal To (lte):** Use `lte:value`.
+            - **Greater Than (gt):** Use `gt:value`.
+            - **Greater Than or Equal To (gte):** Use `gte:value`.
+
+            Separate multiple filters with commas. Dates should be in `YYYY-MM-DD` format.
+          schema:
+            type: string
+            example: 'created_at.gt:2024-04-23,user_name.eq:john_doe'
+        - name: limit
+          in: query
+          description: |
+            Pagination filter for the maximum number of results to return in the response. If `limit` is used in conjunction with `offset`, then page-based pagination is applied.
+          schema:
+            type: integer
+            maximum: 30
+          example: 20
+        - name: offset
+          in: query
+          description: |
+            Offest-based pagination filter for the number of results to skip before displaying resources. A value of `0` will display resources from the beginning of the list. Only affects the response data if a `limit` value is set.
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  total_results:
+                    type: integer
+                    example: 20
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /users/{user_id}:
+    get:
+      summary: Get a user's details
+      description: This operation retrieves information about a user identified by its unique user ID.
+      operationId: getUser
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bc9'
+          description: The unique identifier for the resource.
+        - name: include
+          in: query
+          description: |
+            Projection filters for including only certain resource properties in the response. The value for the parameter should be a comma-separated list of properties from the schema.
+          schema:
+            type: string
+          example: 'user_name,role'
+      responses:
+        '200':
+          description: Successful operation. The response body contains the requested data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    put:
+      summary: Update a user
+      description: This operation updates an existing user with the provided data.
+      operationId: putUser
+      tags:
+        - Users
+      security:
+        - AccessToken: []
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateUserRequest'
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bc9'
+          description: The unique identifier for the resource.
+      responses:
+        '200':
+          description: Resource updated successfully. The response body contains the updated resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      summary: Delete a user
+      description: This operation deletes an existing user identified by its unique user ID.
+      operationId: deleteUser
+      tags:
+        - Users
+      security:
+        - AccessToken: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '66294b2a4475a41f3e709bca'
+          description: The unique identifier for the resource.
+      responses:
+        '204':
+          description: No content. The operation was successful, and there is no content to return.
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /auth/token:
+    post:
+      summary: Authenticate user and obtain a access token
+      description: This operation exchanges the user's username and password directly for an access token. The client ID and client secret are used for client authentication (basic). Certain endpoints require the access token in the Authorization header to perform admin functions like creating menus.
+      operationId: postAuthLogin
+      tags:
+        - Auth
+      security:
+        - BasicAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateTokenRequest'
+      responses:
+        '201':
+          description: Resource created successfully. The response body contains the newly created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Auth'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /auth/refresh-token:
+    post:
+      summary: Refresh access token
+      description: This operation refreshes a access token using the refresh token, providing a new access token and refresh token to the user without requiring reauthentication.
+      operationId: postAuthRefreshToken
+      tags:
+        - Auth
+      requestBody:
+        description: Request body containing information used to create the resource.
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                refresh_token:
+                  $ref: '#/components/schemas/RefreshToken'
+      responses:
+        '200':
+          description: Access token successfully referenced.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Auth'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Points to the resource endpoint for the newly created resource
+        '400':
+          description: Bad request. The request was malformed or invalid.
+        '401':
+          description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+        '403':
+          description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+        '404':
+          description: Not found. The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal server error. An unexpected error occurred on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  # /auth/logout:
+  #   post:
+  #     summary: Logout and invalidate tokens
+  #     description: This operation invalidates the authentication resource associated with the `user_name`.
+  #     operationId: postAuthLogout
+  #     tags:
+  #       - Auth
+  #     responses:
+  #       "200":
+  #         description: Authentication resource invalidated successfully.
+  #       "400":
+  #         description: Bad request. The request was malformed or invalid.
+  #       "401":
+  #         description: Unauthorized. Authentication is required, or the provided credentials are invalid.
+  #       "403":
+  #         description: Forbidden. The server understood the request, but it refuses to authorize it. Authentication will not help.
+  #       "409":
+  #         description: The request could not be completed due to a conflict with the current state of the resource.
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: "#/components/schemas/Problem"
+  #       "500":
+  #         description: Internal server error. An unexpected error occurred on the server.
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: "#/components/schemas/Problem"
+components:
+  requestBodies:
+    CreateCategoryRequest:
+      description: Request body containing information used to create the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              dish_ids:
+                $ref: '#/components/schemas/DishIds'
+              name:
+                $ref: '#/components/schemas/Name'
+            required:
+              - dish_ids
+              - name
+    UpdateCategoryRequest:
+      description: Request body containing information used to update the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              dish_ids:
+                $ref: '#/components/schemas/DishIds'
+              name:
+                $ref: '#/components/schemas/Name'
+    CreateDishRequest:
+      description: Request body containing information used to create the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              description:
+                $ref: '#/components/schemas/Description'
+              image_name:
+                $ref: '#/components/schemas/ImageName'
+              ingredients:
+                $ref: '#/components/schemas/Ingredients'
+              name:
+                $ref: '#/components/schemas/Name'
+              price:
+                $ref: '#/components/schemas/Price'
+              station:
+                $ref: '#/components/schemas/Station'
+            required:
+              - description
+              - image_name
+              - ingredients
+              - name
+              - price
+              - station
+    UpdateDishRequest:
+      description: Request body containing information used to update the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              description:
+                $ref: '#/components/schemas/Description'
+              image_name:
+                $ref: '#/components/schemas/ImageName'
+              ingredients:
+                $ref: '#/components/schemas/Ingredients'
+              name:
+                $ref: '#/components/schemas/Name'
+              price:
+                $ref: '#/components/schemas/Price'
+              station:
+                $ref: '#/components/schemas/Station'
+    CreateIngredientRequest:
+      description: Request body containing information used to create the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                $ref: '#/components/schemas/Name'
+              in_stock_qty:
+                $ref: '#/components/schemas/InStockQty'
+            required:
+              - name
+              - in_stock_qty
+    UpdateIngredientRequest:
+      description: Request body containing information used to update the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                $ref: '#/components/schemas/Name'
+              in_stock_qty:
+                $ref: '#/components/schemas/InStockQty'
+    CreateMenuRequest:
+      description: Request body containing information used to create the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              category_ids:
+                $ref: '#/components/schemas/CategoryIds'
+              name:
+                $ref: '#/components/schemas/Name'
+            required:
+              - name
+              - category_ids
+    UpdateMenuRequest:
+      description: Request body containing information used to update the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              category_ids:
+                $ref: '#/components/schemas/CategoryIds'
+              name:
+                $ref: '#/components/schemas/Name'
+    CreateOrderRequest:
+      description: Request body containing information used to create the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              dish_ids:
+                $ref: '#/components/schemas/DishIds'
+              given_name:
+                $ref: '#/components/schemas/GivenName'
+              table_number:
+                $ref: '#/components/schemas/TableNumber'
+              scheduled_at:
+                $ref: '#/components/schemas/ScheduledAt'
+            required:
+              - dish_ids
+              - given_name
+              - table_number
+          examples:
+            Order - Unscheduled:
+              value:
+                dish_ids:
+                  - '692a4a34a46ecf001f35ac6f'
+                  - '6a4a857c022eb7001f9b8972'
+                  - '6b7c2441a0db43001f9bf377'
+                given_name: 'Ben'
+                table_number: 18
+            Order - Scheduled:
+              value:
+                dish_ids:
+                  - '692a4a34a46ecf001f35ac6f'
+                  - '6a4a857c022eb7001f9b8972'
+                  - '6b7c2441a0db43001f9bf377'
+                given_name: 'Ben'
+                table_number: 18
+                scheduled_at: '2024-08-26T09:03:18.865Z'
+    UpdateOrderRequest:
+      description: Request body containing properties to update the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              dish_ids:
+                $ref: '#/components/schemas/DishIds'
+              priority:
+                $ref: '#/components/schemas/Priority'
+              status:
+                $ref: '#/components/schemas/Status'
+    CreateTokenRequest:
+      description: Request body containing information used to create the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              grant_type:
+                type: string
+                description: 'Tells the login endpoint to do perform the resource owner password credential flow.'
+                example: password
+              user_name:
+                $ref: '#/components/schemas/UserName'
+              password:
+                $ref: '#/components/schemas/Password'
+            required:
+              - grant_type
+              - user_name
+              - password
+    CreateUserRequest:
+      description: |
+        Request body containing information used to update the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                $ref: '#/components/schemas/Email'
+              password:
+                $ref: '#/components/schemas/Password'
+              role:
+                $ref: '#/components/schemas/Role'
+              user_name:
+                $ref: '#/components/schemas/UserName'
+            required:
+              - email
+              - password
+              - role
+              - user_name
+    UpdateUserRequest:
+      description: |
+        Request body containing properties to update the resource.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                $ref: '#/components/schemas/Email'
+              password:
+                $ref: '#/components/schemas/Password'
+              role:
+                $ref: '#/components/schemas/Role'
+              user_name:
+                $ref: '#/components/schemas/UserName'
+  schemas:
+    AccessToken:
+      type: string
+      description: A UUID to access protected resources on behalf of the resource owner. Normally has a relatively short lifespan and needs to be refreshed periodically.
+      example: fa0b97b2-445f-41d2-b50f-fb3b014a301e
+    Auth:
+      type: object
+      description: Defines a set of properties related to authentication and authorization tokens, particularly used in OAuth 2.0 flows.
+      properties:
+        auth_id:
+          $ref: '#/components/schemas/Id'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        access_token:
+          $ref: '#/components/schemas/AccessToken'
+        expires_at:
+          $ref: '#/components/schemas/ExpiresAt'
+        refresh_token:
+          $ref: '#/components/schemas/RefreshToken'
+        token_type:
+          $ref: '#/components/schemas/TokenType'
+        user_name:
+          $ref: '#/components/schemas/UserName'
+    Category:
+      type: object
+      properties:
+        category_id:
+          $ref: '#/components/schemas/Id'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        dish_ids:
+          $ref: '#/components/schemas/DishIds'
+        name:
+          $ref: '#/components/schemas/Name'
+    CategoryIds:
+      type: array
+      items:
+        type: string
+      example:
+        - '66294b2a4475a41f3e709bbc'
+        - '66294b2a4475a41f3e709bbd'
+        - '66294b2a4475a41f3e709bbe'
+      description: Contains the unique identifiers of categories to add to the menu.
+    CreatedAt:
+      type: string
+      format: date-time
+      example: '2024-04-22T10:00:00Z'
+      readOnly: true
+      description: Timestamp when the resource was created in ISO 8601 format.
+    Description:
+      type: string
+      example: A description of the resource.
+    Dish:
+      type: object
+      properties:
+        dish_id:
+          $ref: '#/components/schemas/Id'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        description:
+          $ref: '#/components/schemas/Description'
+        image_name:
+          $ref: '#/components/schemas/ImageName'
+        ingredients:
+          $ref: '#/components/schemas/Ingredients'
+        name:
+          $ref: '#/components/schemas/Name'
+        price:
+          $ref: '#/components/schemas/Price'
+        station:
+          $ref: '#/components/schemas/Station'
+    DishIds:
+      type: array
+      items:
+        type: string
+      example:
+        - '692a4a34a46ecf001f35ac6f'
+        - '6a4a857c022eb7001f9b8972'
+        - '6b7c2441a0db43001f9bf377'
+      description: Contains the unique identifiers of dishes to add to the order.
+    Email:
+      type: string
+      format: email
+      description: The email address of the user that can be used for password resets. It cannot be used for querying.
+      example: 'johndoe@gmail.com'
+    ExpiresAt:
+      type: string
+      format: date-time
+      example: '2024-04-22T10:00:00Z'
+      readOnly: true
+      description: The timestamp when the access token becomes invalid.
+    RefreshToken:
+      type: string
+      description: |
+        A UUID used to obtain a new access token when the current one expires. It has a longer lifespan compared to access tokens.
+      example: d1a3e281-96b6-4f77-a587-7b6c8c2a96d9
+    GivenName:
+      type: string
+      pattern: "^[^\\s]*$"
+      example: 'John'
+      description: The first name of the patron that placed the order. Cannot contain spaces.
+    Id:
+      type: string
+      example: '674d0bf5c28b69001f8e03a1'
+      readOnly: true
+      description: The unique identifier for the resource.
+    ImageName:
+      type: string
+      description: |
+        API consumers can use this string to generate the asset URL for displaying the dish image in user interfaces.
+      example: 'burger.jpg'
+    Ingredients:
+      type: array
+      description: List of ingredients used during the preparation of the dish.
+      items:
+        type: object
+        properties:
+          ingredient_id:
+            type: string
+            example: '66294b2a4475a41f3e709bc4'
+            description: The unique identifier for the resource.
+          is_essential:
+            type: boolean
+            description: |
+              Whether the ingredient is essential to prepare the dish.
+            example: true
+        example:
+          - ingredient_id: '66294b2a4475a41f3e709bc5'
+            is_essential: true
+          - ingredient_id: '66294b2a4475a41f3e709bc6'
+            is_essential: true
+          - ingredient_id: '66294b2a4475a41f3e709bc7'
+            is_essential: false
+    Ingredient:
+      type: object
+      properties:
+        ingredient_id:
+          $ref: '#/components/schemas/Id'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        name:
+          $ref: '#/components/schemas/Name'
+        in_stock_qty:
+          $ref: '#/components/schemas/InStockQty'
+      # required:
+      #   - name
+      #   - in_stock_qty
+    InStockQty:
+      type: integer
+      description: The quantity of the ingredient in the restaurant's inventory. The quantity of the ingredient should be managed by the API consumer.
+      example: 3
+    Name:
+      type: string
+      example: 'main_course'
+      description: ''
+    Menu:
+      type: object
+      properties:
+        order_id:
+          $ref: '#/components/schemas/Id'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        category_ids:
+          $ref: '#/components/schemas/CategoryIds'
+        name:
+          $ref: '#/components/schemas/Name'
+    Order:
+      type: object
+      properties:
+        order_id:
+          $ref: '#/components/schemas/Id'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        dish_ids:
+          $ref: '#/components/schemas/DishIds'
+        given_name:
+          $ref: '#/components/schemas/GivenName'
+        priority:
+          $ref: '#/components/schemas/Priority'
+        scheduled_at:
+          $ref: '#/components/schemas/ScheduledAt'
+        status:
+          $ref: '#/components/schemas/Status'
+        table_number:
+          $ref: '#/components/schemas/TableNumber'
+    Password:
+      type: string
+      description: A password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character (@, $, !, %, *, ?, &).
+      example: 'P@ssw0rd!'
+    Price:
+      type: number
+      format: float
+      example: 9.99
+      description: The cost of the dish.
+    Priority:
+      type: integer
+      minimum: 0
+      maximum: 5
+      default: 3
+      description: Order priority from `1` to `5` (i.e., greatest to least priority). Priority is normally adjusted by kitchen staff.
+    Problem:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Human-readable error title.
+          example: Human-readable error title.
+        detail:
+          type: string
+          description: Human-readable error details.
+          example: Human-readable error details.
+      required:
+        - title
+        - detail
+    Role:
+      type: string
+      enum: ['patron', 'expeditor', 'chef', 'manager']
+      example: manager
+      description: The role that determines a user's access rights to resources.
+    ScheduledAt:
+      type: string
+      format: date-time
+      description: The timestamp indicating when the order is scheduled for.
+      nullable: true
+      example: null
+    Station:
+      type: string
+      description: |
+        The restaurant kitchen has 3 stations where food is prepared:
+          - cold: This area is responsible for preparing cold appetizers, salads, and desserts that don't require cooking.
+          - hot: Also known as the "hot line" or "hot side," this area handles dishes that require cooking over heat, such as sautéing, frying, grilling, and baking.
+          - beverages: In addition to coffee bars, there may be stations dedicated to preparing other beverages such as cocktails, smoothies, or fresh juices.
+      enum: ['cold', 'hot', 'beverages']
+      example: 'hot'
+    Status:
+      type: string
+      nullable: true
+      enum:
+        [
+          'received',
+          'in_progress',
+          'ready_for_assembly',
+          'on_the_way',
+          'ready_for_pickup',
+        ]
+      example: 'received'
+      description: |
+        The status of the order as it progresses toward completion:
+
+        - **`received`**: The patron has placed an order, displaying details in the expeditor's KDS. 
+        - **`in_progress`**: The expeditor prioritizes the order, displaying relevant parts in the respective KDS stations for preparation.
+        - **`ready_for_assembly`**: Stations mark dishes as ready, and the expeditor assembles the order.
+          - **Table-side**: The expeditor changes the status to `on_the_way`, and a food runner delivers it.
+          - **Takeaway**: The expeditor changes the status to `ready_for_pickup`, and the patron collects it at the pickup station.
+    TableNumber:
+      type: integer
+      example: 8
+      nullable: true
+      description: |
+        The table number tells the staff where in the the patron is located. Set the value to `null` for a takeaway order.
+    TokenType:
+      type: string
+      description: Describes how the access token can be used.
+      example: Bearer
+    UpdatedAt:
+      type: string
+      format: date-time
+      example: '2024-04-22T10:00:00Z'
+      readOnly: true
+      description: Timestamp when the order was created in ISO 8601 format.
+    User:
+      type: object
+      properties:
+        user_id:
+          $ref: '#/components/schemas/Id'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          $ref: '#/components/schemas/Password'
+        role:
+          $ref: '#/components/schemas/Role'
+        user_name:
+          $ref: '#/components/schemas/UserName'
+    UserName:
+      type: string
+      description: The user name of the user for login purposes. Cannot contain spaces.
+      example: john_doe
+  securitySchemes:
+    AccessToken:
+      type: http
+      scheme: bearer
+    BasicAuth:
+      type: http
+      scheme: basic
+      description: |
+        Authentication using client credentials. Use the `client_id` as the username and `client_secret` as the password.
+
+        - **client_id**: Public identifier for the client application. Example: `admin_web_app`.
+        - **client_secret**: Confidential string for client authentication. Example: `a5d7f23e-8b64-4b4c-9b11-21c5cfdf25f1`.
