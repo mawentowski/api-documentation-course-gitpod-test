@@ -1,15 +1,18 @@
 {
+  // Set Prettier as the default code formatter
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // Enable format on save
+  "editor.formatOnSave": true,
+
   // Enable auto-fixing for ESLint on save
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
-  // Set Prettier as the default code formatter
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  // Enable format on save
-  "editor.formatOnSave": true,
+
   // Optional: Configure Prettier settings
   "prettier.singleQuote": true,
-  "prettier.tabWidth": 2,
   "prettier.trailingComma": "es5",
+  "prettier.tabWidth": 2,
   "terminal.integrated.defaultProfile.windows": "Git Bash"
 }
