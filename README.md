@@ -52,19 +52,19 @@ As you follow the README instructions, you'll be guided on which support topic t
 When posting an issue, please use the following template:
 
 ```markdown
-**Issue Title**
+**Issue Title:**
 Provide a concise title for your issue.
 
 **Operating System**:
 Specify your operating system (Windows/Mac/Linux). If you are posting to an OS-specific channel, then you can omit this information.
 
-**OS Version**
+**OS Version:**
 Indicate the specific release or version of your operating system.
 
-**Type of computer**
+**Type of computer:**
 Is this a personal or work computer?
 
-**Description**
+**Description:**
 Give a detailed description of the issue. Include steps to replicate the problem, any error messages (you can copy from the terminal), and relevant screenshots if possible.
 ```
 
