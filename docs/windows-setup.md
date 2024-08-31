@@ -53,18 +53,25 @@ This guide walks you through setting up Git Bash on Windows, configuring it as t
 ## 2. **Confirm the Path to Git Bash Executable**
 
 1. **Find the Git Bash Executable Path:**
-
+<comment>
+- In Windows 10 22H2, I did not have Windows Terminal installed. I had too acquire it via the Windows Store.
+- When I opened Windows Terminal, it defaulted to opening a tabbed terminal of PowerShell, not Command Line. Only the latter
+shell implementation has a `where` command.
+</comment>
    - Open "Windows Terminal" (search for it from the Start menu) and run the following command to locate the path to the `bash` executable:
+
      ```bash
      where bash
      ```
 
-2. **Copy the Path:**
+1. **Copy the Path:**
 
    - The output will typically show a path similar to:
+
      ```plaintext
      C:\Program Files\Git\bin\bash.exe
      ```
+
    - Copy this path, as you'll need it for the next step in configuring your terminal settings.
 
 ## 2. **Setting Git Bash as the Default Terminal in Windows Terminal**
@@ -132,15 +139,23 @@ Prerequisites: You have copied the path to the `bash` executable to your clipboa
 
 - Open a new terminal window in VS Code by clicking **Terminal** (from the top menu items) and select **New Terminal**.
 - To confirm that you are using Git Bash, run:
+
   ```bash
   echo $SHELL
   ```
+
 - The output should show a path similar to `/usr/bin/bash` if Git Bash is set up correctly. If you receive an error, it's likely there was an issue configuring Git Bash on Windows / VS Code.
 
 ## 5. Generate a SSH Key
 
 Run the following command, replacing `your_email@example.com` with your GitHub email address:
 
+<comment>
+- In Windows 10 Home 22H2, I did not have Windows Terminal installed. I had too acquire it via the Windows Store. I'm not sure if
+Windows Terminal comes preinstalled in Windows 10 Professional or any version of Windows 11.
+- When I opened Windows Terminal, it defaulted to opening a tabbed terminal of PowerShell, not Command Line. Only the latter
+shell implementation has a `where` command.
+</comment>
 ```bash
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 ```
@@ -152,6 +167,7 @@ Press `Enter` to accept the default file location. You can set a passphrase for 
 1. **Open Your `.bash_profile`:**
 
    - Open Git Bash and use:
+
      ```bash
      nano ~/.bash_profile
      ```
@@ -159,26 +175,32 @@ Press `Enter` to accept the default file location. You can set a passphrase for 
 2. **Add SSH Agent Lines:**
 
    - Add the following lines to the bottom of your `.bash_profile` file:
+
      ```bash
      # Start the SSH agent
      eval "$(ssh-agent -s)"
      # Add your SSH private key to the agent
      ssh-add ~/.ssh/id_rsa
      ```
+
    - To exit `nano`, press `Ctrl + O` to save and `Ctrl + X` to exit.
 
 3. **Source the `.bash_profile`:**
 
    - Apply the changes by running:
+
      ```bash
      source ~/.bash_profile
      ```
 
 4. **Verify the SSH Agent:**
+
    - Open a Git Bash terminal (if one is not already open) and check if the SSH agent is running by executing:
+
      ```bash
      ssh-add -l
      ```
+
    - This command should list your added SSH keys if everything is set up correctly.
 
 ## 4. **Copy the SSH Public Key to Clipboard:**
@@ -225,15 +247,20 @@ Copy this long string, as you'll need it for the next step.
    - Click “Install” and then “Finish” once the installation is complete.
 
 4. **Verify Installation:**
+
    - Open a new terminal in VS Code by selecting `Terminal` > `New Terminal` from the menu or using the shortcut `` Ctrl + ` `` (backtick).
    - Check Node.js version:
+
      ```bash
      node --version
      ```
+
    - Check npm version:
+
      ```bash
      npm --version
      ```
+
    - Both commands should output their respective versions, confirming that Node.js and npm are properly installed.
 
 ## 7. **Install `curl`**
@@ -245,6 +272,11 @@ Copy this long string, as you'll need it for the next step.
 2. **Extract and Install `curl`:**
 
    - Extract the downloaded ZIP file to a location of your choice.
+ - <comment>
+Might be good to stress here that the desired path is not the complete path to the executable `C:\path\to\curl\bin\curl.exe`,
+but rather the path to its parent directory `C:\path\to\curl\bin`.
+</comment>
+```bash
    - Add the path of the extracted `curl` executable (e.g., `C:\path\to\curl\bin`) to your system's `PATH` environment variable:
 
      - Open the Start menu, search for "Environment Variables," and select "Edit the system environment variables."
@@ -258,7 +290,9 @@ Copy this long string, as you'll need it for the next step.
 **Test `curl` Installation:**
 
 - Open Git Bash and run a simple `curl` command to verify it’s working:
+
   ```bash
   curl https://jsonplaceholder.typicode.com/posts/1
   ```
+
 - This command should return data from a free API endpoint, confirming that `curl` is installed and functioning correctly.
