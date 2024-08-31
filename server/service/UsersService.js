@@ -1,11 +1,11 @@
-"use strict";
+'use strict';
 
-const sortingUtils = require("../utils/sortingUtils");
-const problem = require("../utils/problem");
-const mongoose = require("mongoose");
-const UserModel = mongoose.model("User", require("../models/User").User);
-const AuthModel = mongoose.model("Auth", require("../models/Auth").Auth);
-const { Types } = require("mongoose");
+const sortingUtils = require('../utils/sortingUtils');
+const problem = require('../utils/problem');
+const mongoose = require('mongoose');
+const UserModel = mongoose.model('User', require('../models/User').User);
+const AuthModel = mongoose.model('Auth', require('../models/Auth').Auth);
+const { Types } = require('mongoose');
 
 exports.postUser = async function (body) {
   try {
@@ -52,19 +52,26 @@ exports.postUser = async function (body) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.getAllUsers = async function (sort, include, select, limit, offset) {
+exports.getAllUsers = async function (
+  sort,
+  order,
+  fields,
+  filter,
+  limit,
+  offset
+) {
   try {
-    const sortOptions = sortingUtils.parseSortOptions(sort);
-    const selectOptions = sortingUtils.parseSelectOptions(include);
-    const filterOptions = sortingUtils.parseFilterOptions(select);
+    const sortOptions = sortingUtils.parseSortOptions(sort, order);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+    const filterOptions = sortingUtils.parseFilterOptions(filter);
 
-    let usersQuery = UserModel.find(filterOptions, selectOptions);
+    let usersQuery = UserModel.find(filterOptions, fieldsOptions);
 
     if (limit) {
       if (offset) {
@@ -75,19 +82,21 @@ exports.getAllUsers = async function (sort, include, select, limit, offset) {
     }
 
     const users = await usersQuery.sort(sortOptions).exec();
+    const totalResults = await UserModel.countDocuments(filterOptions);
 
     const response = {
       results: users.map((user) => ({
-        user_id: user._id,
+        id: user._id,
         created_at: user.created_at,
         updated_at: user.updated_at,
+        name: user.name,
         user_name: user.user_name,
         password: user.password,
         email: user.email,
         role: user.role,
       })),
+      total_results: totalResults,
     };
-
     response.total_results = users.length;
 
     return response;
@@ -96,39 +105,40 @@ exports.getAllUsers = async function (sort, include, select, limit, offset) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.getUser = async function getUser(user_id, include) {
+exports.getUser = async function getUser(id, fields) {
   try {
-    if (!Types.ObjectId.isValid(user_id)) {
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "Invalid user ID format. Ensure the user ID is a valid Mongo database ObjectId string.",
+        'Invalid user ID format. Ensure the user ID is a valid Mongo database ObjectId string.',
         400
       );
     }
 
-    const user = await UserModel.findById(user_id);
+    const user = await UserModel.findById(id);
     if (!user) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "User not found. If you are unsure of the ID, try searching for the user by the table number and given name.",
+        'User not found. If you are unsure of the ID, try searching for the user by the table number and given name.',
         404
       );
     }
-    const selectOptions = sortingUtils.parseSelectOptions(include);
-    let usersQuery = UserModel.findById(user_id, selectOptions);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+    let usersQuery = UserModel.findById(id, fieldsOptions);
 
     const response = await usersQuery.exec();
 
     return {
-      user_id: response._id,
+      id: response._id,
       created_at: response.created_at,
       updated_at: response.updated_at,
+      name: response.name,
       user_name: response.user_name,
       password: response.password,
       email: response.email,
@@ -143,20 +153,20 @@ exports.getUser = async function getUser(user_id, include) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.putUser = async function (body, user_id, token) {
+exports.putUser = async function (body, id, token) {
   try {
     const existingAuth = await AuthModel.findOne({ access_token: token });
 
     if (!existingAuth) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token is invalid.",
+        'Bearer token is invalid.',
         401
       );
     }
@@ -164,30 +174,29 @@ exports.putUser = async function (body, user_id, token) {
     if (new Date() > new Date(existingAuth.expires_at)) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token has expired.",
+        'Bearer token has expired.',
         401
       );
     }
-    
-    
-    if (!Types.ObjectId.isValid(user_id)) {
+
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "Invalid user ID format. Ensure the user ID is a valid Mongo database ObjectId string.",
+        'Invalid user ID format. Ensure the user ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const existingUser = await UserModel.findById(user_id);
+    const existingUser = await UserModel.findById(id);
     if (!existingUser) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "User not found. If you are unsure of the ID, try searching for the user using their email or user name.",
+        'User not found. If you are unsure of the ID, try searching for the user using their email or user name.',
         404
       );
     }
 
     const existingUserWithSameEmailOrUserName = await UserModel.findOne({
-      _id: { $ne: user_id },
+      _id: { $ne: id },
       $or: [{ email: body.email }, { user_name: body.user_name }],
     });
 
@@ -229,20 +238,20 @@ exports.putUser = async function (body, user_id, token) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.deleteUser = async function (user_id, token) {
+exports.deleteUser = async function (id, token) {
   try {
     const existingAuth = await AuthModel.findOne({ access_token: token });
 
     if (!existingAuth) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token is invalid.",
+        'Bearer token is invalid.',
         401
       );
     }
@@ -250,27 +259,27 @@ exports.deleteUser = async function (user_id, token) {
     if (new Date() > new Date(existingAuth.expires_at)) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token has expired.",
+        'Bearer token has expired.',
         401
       );
     }
-    
-    if (!Types.ObjectId.isValid(user_id)) {
+
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "Invalid user ID format. Ensure the user ID is a valid Mongo database ObjectId string.",
+        'Invalid user ID format. Ensure the user ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const user = await UserModel.findById(user_id);
+    const user = await UserModel.findById(id);
     if (!user) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "User not found. If you are unsure of the ID, try searching for the user using their email or user name.",
+        'User not found. If you are unsure of the ID, try searching for the user using their email or user name.',
         404
       );
     }
-    await UserModel.deleteOne({ _id: user_id });
+    await UserModel.deleteOne({ _id: id });
   } catch (error) {
     switch (error.status) {
       case 400:
@@ -282,7 +291,7 @@ exports.deleteUser = async function (user_id, token) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }

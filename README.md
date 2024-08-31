@@ -101,7 +101,7 @@ If you encounter any issues, post your issue to the channel most closely related
 
 For example:
 
-- **Windows:** If you are Windows are are having trouble installing Git Bash, post to the **SUPPORT - WINDOWS** > [# git-gitbash] channel.
+- **Windows:** If you are Windows are are having trouble installing Git Bash, post to the **SUPPORT - WINDOWS** > [# git-gitbash](https://discord.com/channels/1278288408795549716/1278295713742061579) channel.
 - **Mac:** If you on Mac and cannot install Xcode, post to the **Support - Mac** > [# xcode](https://discord.com/channels/1278288408795549716/1278301960247971982) channel.
 
 Remember to follow the issue template in the [Getting Help](#getting-help) section of this README.
@@ -109,7 +109,7 @@ Remember to follow the issue template in the [Getting Help](#getting-help) secti
 ## Configuring Visual Studio Code
 
 1. Open Visual Studio Code.
-1. Click the **Extensions** tab and search for the following extensions, then install them:
+1. Click the **Extensions** tab and search for the following extensions (left-most toolbar), then install them:
 
 - Prettier (code formatter)
 - ESLint (linter for JavaScript)

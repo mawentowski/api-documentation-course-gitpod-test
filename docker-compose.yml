@@ -1,42 +1,53 @@
-services:
-  api-server:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./server:/app
-    depends_on:
-      - pos-db
-  prism-proxy:
-      image: stoplight/prism:4
-      command: ["proxy", "--host", "0.0.0.0", "/api/openapi.yaml", "http://api-server:8080"] 
-      ports:
-        - "4010:4010"
-      volumes:
-        - ./server/api:/api
-      depends_on:
-        - api-server
-  swagger-editor:
-    image: swaggerapi/swagger-editor
-    ports:
-      - "8000:8000"
-    environment:
-      - PORT=8000
-      - SWAGGER_FILE=/api/openapi.yml
-    volumes:
-      - ./design/api:/api
-  swagger-ui:
-    image: swaggerapi/swagger-ui
-    ports:
-      - "5500:5500"
-    environment:
-      - PORT=5500
-      - SWAGGER_JSON=/api/openapi.yml
-    volumes:
-      - ./design/api:/api
-  pos-db:
-    image: mongo
-    ports:
-      - "27017:27017"
+services: # Defines a list of services that will be created and managed by Docker Compose.
+  api-server: # Defines the api-server service.
+    build: # Specifies build options for the api-server service.
+      context: ./server # Sets the build context to the ./server directory.
+      dockerfile: Dockerfile # Tells Docker to use the Dockerfile located in the ./server directory to build the image.
+    ports: # Exposes ports to the host machine.
+      - '8080:8080' # Maps port 8080 on the host to port 8080 in the container.
+    volumes: # Mounts directories from the host into the container.
+      - ./server:/app # Mounts the ./server directory on the host to the /app directory in the container.
+    depends_on: # Specifies that this service depends on other services.
+      - pos-db # The api-server service depends on the pos-db service.
+
+  # prism-proxy:
+  #   image: stoplight/prism:4
+  #   command:
+  #     [
+  #       'proxy',
+  #       '--host',
+  #       '0.0.0.0',
+  #       '/api/openapi.yaml',
+  #       'http://api-server:8080',
+  #     ]
+  #   ports:
+  #     - '4010:4010'
+  #   volumes:
+  #     - ./server/api:/api
+  #   depends_on:
+  #     - api-server
+
+  swagger-editor: # Defines the swagger-editor service.
+    image: swaggerapi/swagger-editor # Specifies the Docker image to use, which is swaggerapi/swagger-editor.
+    ports: # Exposes ports to the host machine.
+      - '8000:8000' # Maps port 8000 on the host to port 8000 in the container.
+    environment: # Sets environment variables for the container.
+      - PORT=8000 # Sets the PORT environment variable to 8000.
+      - SWAGGER_FILE=/api/openapi.yml # Specifies the path to the Swagger file.
+    volumes: # Mounts directories from the host into the container.
+      - ./design/api:/api # Mounts the ./design/api directory on the host to the /api directory in the container.
+
+  swagger-ui: # Defines the swagger-ui service.
+    image: swaggerapi/swagger-ui # Specifies the Docker image to use, which is swaggerapi/swagger-ui.
+    ports: # Exposes ports to the host machine.
+      - '5500:5500' # Maps port 5500 on the host to port 5500 in the container.
+    environment: # Sets environment variables for the container.
+      - PORT=5500 # Sets the PORT environment variable to 5500.
+      - SWAGGER_JSON=/api/openapi.yml # Specifies the path to the Swagger JSON file.
+    volumes: # Mounts directories from the host into the container.
+      - ./design/api:/api # Mounts the ./design/api directory on the host to the /api directory in the container.
+
+  pos-db: # Defines the pos-db service.
+    image: mongo # Specifies the Docker image to use, which is mongo (MongoDB).
+    ports: # Exposes ports to the host machine.
+      - '27017:27017' # Maps port 27017 on the host to port 27017 in the container, which is the default port for MongoDB.

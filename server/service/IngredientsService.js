@@ -12,24 +12,24 @@ const { Types } = require('mongoose');
 
 exports.postIngredient = async function (body, token) {
   try {
-    // Validate the token against the database
-    // const existingAuth = await AuthModel.findOne({ access_token: token });
+    console.log('the token passed in the request is:', token);
+    const existingAuth = await AuthModel.findOne({ access_token: token });
 
-    // if (!existingAuth) {
-    //   throw new problem.Problem(
-    //     problem.E_UNAUTHORIZED,
-    //     'Bearer token is invalid.',
-    //     401
-    //   );
-    // }
-    // // Check if the token is expired
-    // if (new Date() > new Date(existingAuth.expires_at)) {
-    //   throw new problem.Problem(
-    //     problem.E_UNAUTHORIZED,
-    //     'Bearer token has expired.',
-    //     401
-    //   );
-    // }
+    if (!existingAuth) {
+      throw new problem.Problem(
+        problem.E_UNAUTHORIZED,
+        'Bearer token is invalid.',
+        401
+      );
+    }
+    // Check if the token is expired
+    if (new Date() > new Date(existingAuth.expires_at)) {
+      throw new problem.Problem(
+        problem.E_UNAUTHORIZED,
+        'Bearer token has expired.',
+        401
+      );
+    }
 
     const existingIngredientByName = await IngredientModel.findOne({
       name: body.name,
@@ -61,9 +61,9 @@ exports.postIngredient = async function (body, token) {
   }
 };
 
-exports.getIngredient = async function getIngredient(ingredient_id, include) {
+exports.getIngredient = async function getIngredient(id, fields) {
   try {
-    if (!Types.ObjectId.isValid(ingredient_id)) {
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
         'Invalid ingredient ID format. Ensure the ingredient ID is a valid Mongo database ObjectId string.',
@@ -71,7 +71,7 @@ exports.getIngredient = async function getIngredient(ingredient_id, include) {
       );
     }
 
-    const ingredient = await IngredientModel.findById(ingredient_id);
+    const ingredient = await IngredientModel.findById(id);
     if (!ingredient) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
@@ -79,19 +79,17 @@ exports.getIngredient = async function getIngredient(ingredient_id, include) {
         404
       );
     }
-    const selectOptions = sortingUtils.parseSelectOptions(include);
-    let ingredientsQuery = IngredientModel.findById(
-      ingredient_id,
-      selectOptions
-    );
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+    let ingredientsQuery = IngredientModel.findById(id, fieldsOptions);
 
     const response = await ingredientsQuery.exec();
 
     return {
-      ingredient_id: response._id,
+      id: response._id,
       created_at: response.created_at,
       updated_at: response.updated_at,
       name: response.name,
+      price: response.price,
       in_stock_qty: response.in_stock_qty,
     };
   } catch (error) {
@@ -111,17 +109,22 @@ exports.getIngredient = async function getIngredient(ingredient_id, include) {
 
 exports.getIngredientList = async function (
   sort,
-  include,
-  select,
+  order,
+  fields,
+  filter,
   limit,
   offset
 ) {
   try {
-    const sortOptions = sortingUtils.parseSortOptions(sort);
-    const selectOptions = sortingUtils.parseSelectOptions(include);
-    const filterOptions = sortingUtils.parseFilterOptions(select);
+    if (filter && filter.includes('q.eq~')) {
+      filter = filter.replace('q.eq~', 'name.eq~');
+    }
 
-    let ingredientsQuery = IngredientModel.find(filterOptions, selectOptions);
+    const sortOptions = sortingUtils.parseSortOptions(sort, order);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+    const filterOptions = sortingUtils.parseFilterOptions(filter);
+
+    let ingredientsQuery = IngredientModel.find(filterOptions, fieldsOptions);
 
     if (limit) {
       if (offset) {
@@ -132,18 +135,19 @@ exports.getIngredientList = async function (
     }
 
     const ingredients = await ingredientsQuery.sort(sortOptions).exec();
+    const totalResults = await IngredientModel.countDocuments(filterOptions);
 
     const response = {
       results: ingredients.map((ingredient) => ({
-        ingredient_id: ingredient._id,
+        id: ingredient._id,
         created_at: ingredient.created_at,
         updated_at: ingredient.updated_at,
         name: ingredient.name,
+        price: ingredient.price,
         in_stock_qty: ingredient.in_stock_qty,
       })),
+      total_results: totalResults,
     };
-
-    response.total_results = ingredients.length;
 
     return response;
   } catch (error) {
@@ -157,34 +161,34 @@ exports.getIngredientList = async function (
   }
 };
 
-exports.putIngredient = async function (body, ingredient_id, token) {
+exports.putIngredient = async function (body, id, token) {
   try {
-    // const existingAuth = await AuthModel.findOne({ access_token: token });
+    const existingAuth = await AuthModel.findOne({ access_token: token });
 
-    // if (!existingAuth) {
-    //   throw new problem.Problem(
-    //     problem.E_UNAUTHORIZED,
-    //     'Bearer token is invalid.',
-    //     401
-    //   );
-    // }
-    // // Check if the token is expired
-    // if (new Date() > new Date(existingAuth.expires_at)) {
-    //   throw new problem.Problem(
-    //     problem.E_UNAUTHORIZED,
-    //     'Bearer token has expired.',
-    //     401
-    //   );
-    // }
+    if (!existingAuth) {
+      throw new problem.Problem(
+        problem.E_UNAUTHORIZED,
+        'Bearer token is invalid.',
+        401
+      );
+    }
+    // Check if the token is expired
+    if (new Date() > new Date(existingAuth.expires_at)) {
+      throw new problem.Problem(
+        problem.E_UNAUTHORIZED,
+        'Bearer token has expired.',
+        401
+      );
+    }
 
-    if (!Types.ObjectId.isValid(ingredient_id)) {
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
         'Invalid ingredient ID format. Ensure the ingredient ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const existingIngredient = await IngredientModel.findById(ingredient_id);
+    const existingIngredient = await IngredientModel.findById(id);
     if (!existingIngredient) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
@@ -196,6 +200,7 @@ exports.putIngredient = async function (body, ingredient_id, token) {
     // Validate required fields and generate error message
     let missingFields = [];
     if (!body.name) missingFields.push('name');
+    if (!body.price) missingFields.push('price');
     if (!body.in_stock_qty) missingFields.push('in_stock_qty');
 
     if (missingFields.length > 0) {
@@ -245,33 +250,33 @@ exports.putIngredient = async function (body, ingredient_id, token) {
     }
   }
 };
-exports.deleteIngredient = async function (ingredient_id, token) {
+exports.deleteIngredient = async function (id, token) {
   try {
-    // const existingAuth = await AuthModel.findOne({ access_token: token });
+    const existingAuth = await AuthModel.findOne({ access_token: token });
 
-    // if (!existingAuth) {
-    //   throw new problem.Problem(
-    //     problem.E_UNAUTHORIZED,
-    //     'Bearer token is invalid.',
-    //     401
-    //   );
-    // }
-    // // Check if the token is expired
-    // if (new Date() > new Date(existingAuth.expires_at)) {
-    //   throw new problem.Problem(
-    //     problem.E_UNAUTHORIZED,
-    //     'Bearer token has expired.',
-    //     401
-    //   );
-    // }
-    if (!Types.ObjectId.isValid(ingredient_id)) {
+    if (!existingAuth) {
+      throw new problem.Problem(
+        problem.E_UNAUTHORIZED,
+        'Bearer token is invalid.',
+        401
+      );
+    }
+    // Check if the token is expired
+    if (new Date() > new Date(existingAuth.expires_at)) {
+      throw new problem.Problem(
+        problem.E_UNAUTHORIZED,
+        'Bearer token has expired.',
+        401
+      );
+    }
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
         'Invalid ingredient ID format. Ensure the ingredient ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const ingredient = await IngredientModel.findById(ingredient_id);
+    const ingredient = await IngredientModel.findById(id);
     if (!ingredient) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
@@ -279,7 +284,7 @@ exports.deleteIngredient = async function (ingredient_id, token) {
         404
       );
     }
-    await IngredientModel.deleteOne({ _id: ingredient_id });
+    await IngredientModel.deleteOne({ _id: id });
   } catch (error) {
     switch (error.status) {
       case 400:

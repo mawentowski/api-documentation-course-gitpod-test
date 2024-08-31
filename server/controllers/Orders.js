@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils/writer.js");
-const problem = require("../utils/problem");
-var Orders = require("../service/OrdersService");
+var utils = require('../utils/writer.js');
+const problem = require('../utils/problem');
+var Orders = require('../service/OrdersService');
 
 module.exports.postOrder = function postOrder(req, res, next, body) {
   const authHeader = req.headers['authorization'];
@@ -10,11 +10,11 @@ module.exports.postOrder = function postOrder(req, res, next, body) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     const unauthorizedError = new problem.Problem(
       problem.E_UNAUTHORIZED,
-      "The bearer token is missing."
+      'The bearer token is missing.'
     );
     return unauthorizedError.toResponse(res);
   }
-  
+
   const token = authHeader.split(' ')[1];
   Orders.postOrder(body, token)
     .then(function (response) {
@@ -24,10 +24,10 @@ module.exports.postOrder = function postOrder(req, res, next, body) {
       if (error instanceof problem.Problem) {
         error.toResponse(res); // Send the custom error response
       } else {
-        console.error("Error creating order:", error);
+        console.error('Error creating order:', error);
         const serverError = new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the controller layer of the API server. Report the issue to API support."
+          'There was an issue originating from the controller layer of the API server. Report the issue to API support.'
         );
         serverError.toResponse(res);
       }
@@ -39,12 +39,18 @@ module.exports.getOrderList = function getOrderList(
   res,
   next,
   sort,
-  include,
-  select,
+  order,
+  fields,
+  filter,
   limit,
   offset
 ) {
-  Orders.getOrderList(sort, include, select, limit, offset)
+  console.log('Received query params:', req.query);
+  console.log('Received sort param:', sort);
+  console.log('Received order param:', order);
+  console.log('Received select param:', filter);
+  console.log('Received include param:', fields);
+  Orders.getOrderList(sort, order, fields, filter, limit, offset)
     .then(function (response) {
       res.status(200).json(response);
     })
@@ -52,21 +58,20 @@ module.exports.getOrderList = function getOrderList(
       if (error instanceof problem.Problem) {
         error.toResponse(res);
       } else {
-        console.error("Error retrieving a list of orders:", error);
+        console.error('Error retrieving a list of orders:', error);
         const serverError = new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the controller layer of the API server. Report the issue to API support."
+          'There was an issue originating from the controller layer of the API server. Report the issue to API support.'
         );
         serverError.toResponse(res);
       }
     });
 };
 
-module.exports.getOrder = function getOrder(req, res, next, include) {
-  const order_id = req.openapi.pathParams.order_id;
-  console.log("the order_id passed to controller is:", order_id);
+module.exports.getOrder = function getOrder(req, res, next, fields) {
+  const id = req.openapi.pathParams.id;
 
-  Orders.getOrder(order_id, include)
+  Orders.getOrder(id, fields)
     .then(function (response) {
       res.status(200).json(response);
     })
@@ -74,10 +79,10 @@ module.exports.getOrder = function getOrder(req, res, next, include) {
       if (error instanceof problem.Problem) {
         error.toResponse(res); // Send the custom error response
       } else {
-        console.error("Error getting order:", error);
+        console.error('Error getting order:', error);
         const serverError = new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the controller layer of the API server. Report the issue to API support."
+          'There was an issue originating from the controller layer of the API server. Report the issue to API support.'
         );
         serverError.toResponse(res);
       }
@@ -88,10 +93,15 @@ module.exports.getOrderDishes = function getOrderDishes(
   req,
   res,
   next,
-  include
+  sort,
+  order,
+  fields,
+  filter,
+  limit,
+  offset
 ) {
-  const order_id = req.openapi.pathParams.order_id;
-  Orders.getOrderDishes(order_id, include)
+  const id = req.openapi.pathParams.id;
+  Orders.getOrderDishes(id, sort, order, fields, filter, limit, offset)
     .then(function (response) {
       res.status(200).json(response);
     })
@@ -99,29 +109,29 @@ module.exports.getOrderDishes = function getOrderDishes(
       if (error instanceof problem.Problem) {
         error.toResponse(res); // Send the custom error response
       } else {
-        console.error("Error creating order:", error);
+        console.error('Error creating order:', error);
         const serverError = new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the controller layer of the API server. Report the issue to API support."
+          'There was an issue originating from the controller layer of the API server. Report the issue to API support.'
         );
         serverError.toResponse(res);
       }
     });
 };
 
-module.exports.putOrder = function putOrder(req, res, next, body, order_id) {
+module.exports.putOrder = function putOrder(req, res, next, body, id) {
   const authHeader = req.headers['authorization'];
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     const unauthorizedError = new problem.Problem(
       problem.E_UNAUTHORIZED,
-      "The bearer token is missing."
+      'The bearer token is missing.'
     );
     return unauthorizedError.toResponse(res);
   }
-  
+
   const token = authHeader.split(' ')[1];
-  Orders.putOrder(body, order_id, token)
+  Orders.putOrder(body, id, token)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -129,29 +139,29 @@ module.exports.putOrder = function putOrder(req, res, next, body, order_id) {
       if (error instanceof problem.Problem) {
         error.toResponse(res);
       } else {
-        console.error("Error creating order:", error);
+        console.error('Error creating order:', error);
         const serverError = new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the controller layer of the API server. Report the issue to API support."
+          'There was an issue originating from the controller layer of the API server. Report the issue to API support.'
         );
         serverError.toResponse(res);
       }
     });
 };
 
-module.exports.deleteOrder = function deleteOrder(req, res, next, order_id) {
+module.exports.deleteOrder = function deleteOrder(req, res, next, id) {
   const authHeader = req.headers['authorization'];
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     const unauthorizedError = new problem.Problem(
       problem.E_UNAUTHORIZED,
-      "The bearer token is missing."
+      'The bearer token is missing.'
     );
     return unauthorizedError.toResponse(res);
   }
-  
+
   const token = authHeader.split(' ')[1];
-  Orders.deleteOrder(order_id, token)
+  Orders.deleteOrder(id, token)
     .then(function () {
       res.sendStatus(204);
     })
@@ -159,10 +169,10 @@ module.exports.deleteOrder = function deleteOrder(req, res, next, order_id) {
       if (error instanceof problem.Problem) {
         error.toResponse(res); // Send the custom error response
       } else {
-        console.error("Error getting order:", error);
+        console.error('Error getting order:', error);
         const serverError = new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the controller layer of the API server. Report the issue to API support."
+          'There was an issue originating from the controller layer of the API server. Report the issue to API support.'
         );
         serverError.toResponse(res);
       }

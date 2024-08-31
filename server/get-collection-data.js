@@ -7,12 +7,17 @@ const IngredientModel = mongoose.model(
 const AuthModel = mongoose.model('Auth', require('./models/Auth').Auth);
 const UserModel = mongoose.model('User', require('./models/User').User);
 const DishModel = mongoose.model('Dish', require('./models/Dish').Dish);
-const CategoryModel = mongoose.model(
-  'Category',
-  require('./models/Category').Category
-);
-const MenuModel = mongoose.model('Menu', require('./models/Menu').Menu);
-import { connectDB } from './connectDB';
+
+// import { connectDB } from './scripts/connectDB';
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect('mongodb://localhost:27017/pos-db');
+    console.log('MongoDB connected');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+  }
+};
 
 const getCollectionData = async (model) => {
   try {
@@ -30,18 +35,16 @@ const getCollectionData = async (model) => {
   }
 };
 
-const getCategories = async () => await getCollectionData(CategoryModel);
 const getOrders = async () => await getCollectionData(OrderModel);
-const getMenus = async () => await getCollectionData(MenuModel);
 const getUsers = async () => await getCollectionData(UserModel);
 const getIngredients = async () => await getCollectionData(IngredientModel);
 const getDishes = async () => await getCollectionData(DishModel);
 const getAuths = async () => await getCollectionData(AuthModel);
 
-getCategories();
+// getCategories();
 getOrders();
-getMenus();
-getUsers();
-getIngredients();
-getDishes();
-getAuths();
+// getMenus();
+// getUsers();
+// getIngredients();
+// getDishes();
+// getAuths();

@@ -10,11 +10,7 @@ const IngredientModel = mongoose.model(
 const AuthModel = mongoose.model('Auth', require('./models/Auth').Auth);
 const UserModel = mongoose.model('User', require('./models/User').User);
 const DishModel = mongoose.model('Dish', require('./models/Dish').Dish);
-const CategoryModel = mongoose.model(
-  'Category',
-  require('./models/Category').Category
-);
-const MenuModel = mongoose.model('Menu', require('./models/Menu').Menu);
+
 const { v4: uuidv4 } = require('uuid');
 
 const connectDB = async () => {
@@ -139,48 +135,84 @@ const dishDescriptions = [
 ];
 
 const dishStations = [
-  'cold',
-  'hot',
-  'cold',
-  'cold',
-  'hot',
-  'cold',
-  'hot',
-  'hot',
-  'hot',
-  'hot',
-  'hot',
-  'hot',
-  'hot',
-  'hot',
-  'hot',
-  'hot',
-  'cold',
-  'cold',
-  'cold',
-  'cold',
-  'cold',
-  'cold',
-  'beverages',
-  'beverages',
-  'beverages',
-  'beverages',
-  'beverages',
-  'beverages',
-  'beverages',
+  'cold', // Bruschetta al Pomodoro
+  'hot', // Arancini di Riso
+  'cold', // Caprese Salad
+  'cold', // Prosciutto e Melone
+  'hot', // Calamari Fritti
+  'cold', // Carpaccio di Manzo
+  'cold', // Crostini di Fegato
+  'hot', // Spaghetti Carbonara
+  'hot', // Lasagna alla Bolognese
+  'hot', // Margherita Pizza
+  'hot', // Risotto ai Funghi
+  'hot', // Osso Buco
+  'hot', // Fettuccine Alfredo
+  'hot', // Melanzane alla Parmigiana
+  'hot', // Penne Arrabbiata
+  'hot', // Saltimbocca alla Romana
+  'hot', // Gnocchi al Pesto
+  'cold', // Tiramisu
+  'cold', // Panna Cotta
+  'cold', // Cannoli
+  'cold', // Zabaglione
+  'cold', // Gelato
+  'cold', // Cassata Siciliana
+  'beverages', // Affogato al Caffè
+  'beverages', // Espresso
+  'beverages', // Cappuccino
+  'beverages', // Limoncello
+  'beverages', // Negroni
+  'beverages', // Aperol Spritz
+  'beverages', // Chianti
+  'beverages', // Prosecco
+];
+
+const categoryList = [
+  'Appetizers', // Bruschetta al Pomodoro
+  'Appetizers', // Arancini di Riso
+  'Appetizers', // Caprese Salad
+  'Appetizers', // Prosciutto e Melone
+  'Appetizers', // Calamari Fritti
+  'Appetizers', // Carpaccio di Manzo
+  'Appetizers', // Crostini di Fegato
+  'Main Course', // Spaghetti Carbonara
+  'Main Course', // Lasagna alla Bolognese
+  'Main Course', // Margherita Pizza
+  'Main Course', // Risotto ai Funghi
+  'Main Course', // Osso Buco
+  'Main Course', // Fettuccine Alfredo
+  'Main Course', // Melanzane alla Parmigiana
+  'Main Course', // Penne Arrabbiata
+  'Main Course', // Saltimbocca alla Romana
+  'Main Course', // Gnocchi al Pesto
+  'Dessert', // Tiramisu
+  'Dessert', // Panna Cotta
+  'Dessert', // Cannoli
+  'Dessert', // Zabaglione
+  'Dessert', // Gelato
+  'Dessert', // Cassata Siciliana
+  'Dessert', // Affogato al Caffè
+  'Drinks', // Espresso
+  'Drinks', // Cappuccino
+  'Drinks', // Limoncello
+  'Drinks', // Negroni
+  'Drinks', // Aperol Spritz
+  'Drinks', // Chianti
+  'Drinks', // Prosecco
 ];
 
 const orderStatus = [
-  'received',
-  'in_progress',
-  'ready_for_assembly',
-  'on_the_way',
-  'ready_for_pickup',
+  'Draft',
+  'Received',
+  'In Progress',
+  'Ready for Assembly',
+  'On the Way',
+  'Ready for Pickup',
 ];
 
 let ingredientIds = [];
 let dishIds = [];
-let categoryIds = [];
 
 // Helper function to get random elements from an array
 function getRandomElements(arr, num) {
@@ -211,11 +243,16 @@ const getDishIds = async () => {
 const generateIngredients = async () => {
   try {
     await connectDB();
+    await IngredientModel.deleteMany({});
     const ingredients = Array.from({ length: 50 }, () => {
       const randomIngredient = faker.helpers.arrayElement(ingredientNames);
       return new IngredientModel({
         name: randomIngredient,
         in_stock_qty: faker.number.int({ min: 1, max: 100 }),
+        price: faker.helpers.arrayElement([
+          199, 299, 399, 499, 599, 699, 799, 899, 999, 1999, 2999, 3999, 4999,
+          5999, 6999, 7999, 8999, 9999,
+        ]),
         created_at: faker.date.past(),
         updated_at: faker.date.recent(),
       });
@@ -253,6 +290,7 @@ const generateDishes = async () => {
     // Ensure the database is connected
     await connectDB();
 
+    await DishModel.deleteMany({});
     // Fetch ingredient IDs from the database
     const ingredientDocuments = await IngredientModel.find({}, '_id').exec();
     const ingredientIds = ingredientDocuments.map((doc) => doc._id.toString());
@@ -260,9 +298,12 @@ const generateDishes = async () => {
     // Verify that ingredientIds is populated
     // console.log('Ingredient IDs:', ingredientIds);
 
+    // Define the categories array
+
     const dishes = dishNames.map((name, index) => {
       const dishDescription = dishDescriptions[index];
       const dishStation = dishStations[index];
+      const category = categoryList[index]; // Use the correct category
 
       // Select random ingredients
       const randomIngredients = getRandomElements(
@@ -279,19 +320,20 @@ const generateDishes = async () => {
         is_essential: faker.datatype.boolean(),
       }));
 
-      // Generate image name with either .jpg or .png randomly
-      const imageName = `${name
-        .replace(/\s+/g, '_')
-        .toLowerCase()}.${faker.helpers.arrayElement(['jpg', 'png'])}`;
+      // Generate image name without file extension
+      const imageName = `${name.replace(/\s+/g, '_').toLowerCase()}`;
 
       return {
         name,
         description: dishDescription,
-        price: parseFloat(
-          (
-            Math.floor(faker.number.float({ min: 5, max: 20 }) / 1) + 0.99
-          ).toFixed(2)
-        ),
+        price: faker.helpers.arrayElement([
+          199, 299, 399, 499, 599, 699, 799, 899, 999, 1999, 2999, 3999, 4999,
+          5999, 6999, 7999, 8999, 9999,
+        ]),
+        category,
+        preparation_time: faker.helpers.arrayElement([
+          5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60,
+        ]),
         image_name: imageName,
         station: dishStation,
         ingredients,
@@ -314,6 +356,11 @@ const generateOrders = async () => {
   try {
     await connectDB();
 
+    await OrderModel.deleteMany({});
+
+    const dishDocuments = await DishModel.find({}, '_id').exec();
+    const dishIds = dishDocuments.map((doc) => doc._id.toString());
+
     const orders = Array.from({ length: 50 }, () => {
       const randomDishes = getRandomElements(
         dishIds,
@@ -323,20 +370,24 @@ const generateOrders = async () => {
       const randomOrderStatus = faker.helpers.arrayElement(orderStatus);
 
       // Randomly set scheduled_at to either a future date or null
-      const scheduledAt = faker.datatype.boolean() ? faker.date.future() : null;
+      const scheduledAt = faker.datatype.boolean()
+        ? faker.date.future().toISOString()
+        : null;
 
       return new OrderModel({
-        given_name: faker.person.firstName(),
+        name: faker.person.fullName(),
         table_number: faker.number.int({ min: 1, max: 30 }),
         status: randomOrderStatus,
         priority: faker.number.int({ min: 1, max: 5 }),
         dish_ids: randomDishes,
+        special_requests: faker.lorem.sentence(), // Generates a random sentence for special requests
         scheduled_at: scheduledAt, // Can be null or a future date
         created_at: faker.date.past(),
         updated_at: faker.date.recent(),
       });
     });
 
+    console.log('the orders are', orders);
     await OrderModel.insertMany(orders);
     console.log('Orders seeded successfully');
   } catch (error) {
@@ -344,97 +395,17 @@ const generateOrders = async () => {
   }
 };
 
-const generateCategories = async () => {
-  try {
-    await connectDB();
-
-    // Fetch all dish IDs from the database
-    const dishes = await DishModel.find({}, '_id');
-    const dishIds = dishes.map((dish) => dish._id);
-
-    // Check if dishIds array is populated
-    if (dishIds.length === 0) {
-      throw new Error(
-        'No dishes found in the database. Ensure dishes are seeded.'
-      );
-    }
-
-    // Iterate over categoryList to create categories
-    const categories = categoryList.map((category) => {
-      const randomDishes = getRandomElements(
-        dishIds,
-        faker.number.int({ min: 2, max: 6 })
-      );
-
-      return new CategoryModel({
-        name: category,
-        dish_ids: randomDishes,
-        created_at: faker.date.past(),
-        updated_at: faker.date.recent(),
-      });
-    });
-
-    // Insert the exact number of categories corresponding to the length of categoryList
-    await CategoryModel.insertMany(categories);
-    console.log('Categories seeded successfully');
-  } catch (error) {
-    console.error('Error seeding the database:', error);
-  }
-};
-
-const categoryList = ['Appetizers', 'Main Course', 'Dessert', 'Drinks'];
-
-const menuList = ['Breakfast', 'Lunch', 'Dinner'];
-
-const generateMenus = async () => {
-  try {
-    await connectDB();
-
-    // Fetch all dish IDs from the database
-    const categories = await CategoryModel.find({}, '_id');
-    const categoryIds = categories.map((category) => category._id);
-
-    // Check if dishIds array is populated
-    if (categoryIds.length === 0) {
-      throw new Error(
-        'No categories found in the database. Ensure categories are seeded.'
-      );
-    }
-
-    // Iterate over categoryList to create categories
-    const menus = menuList.map((menu) => {
-      // const randomDishes = getRandomElements(
-      //   dishIds,
-      //   faker.number.int({ min: 2, max: 6 })
-      // );
-
-      return new MenuModel({
-        name: menu,
-        category_ids: categoryIds,
-        created_at: faker.date.past(),
-        updated_at: faker.date.recent(),
-      });
-    });
-
-    // Insert the exact number of categories corresponding to the length of categoryList
-    await MenuModel.insertMany(menus);
-    console.log('Menus seeded successfully');
-  } catch (error) {
-    console.error('Error seeding the database:', error);
-  }
-};
-
 const userNames = [
-  'api_user01',
-  'dev_user02',
-  'tech_guru03',
-  'coder_jane04',
-  'dev_master05',
-  'api_expert06',
-  'backend_pro07',
-  'frontend_dev08',
-  'fullstack_ninja09',
-  'sysadmin_joe10',
+  'apiuser01',
+  'devuser02',
+  'techguru03',
+  'coderjane04',
+  'devmaster05',
+  'apiexpert06',
+  'backendpro07',
+  'frontenddev08',
+  'fullstackninja09',
+  'sysadminjoe10',
 ];
 
 const passwords = [
@@ -469,12 +440,15 @@ const generateUsers = async () => {
   try {
     await connectDB();
 
+    await UserModel.deleteMany({});
+
     // Create users using the data from the arrays
     const users = userNames.map((userName, index) => {
       // Choose a random role for each user
       const randomRole = faker.helpers.arrayElement(roles);
 
       return new UserModel({
+        name: faker.person.fullName(),
         user_name: userName,
         password: passwords[index],
         email: emails[index],
@@ -487,27 +461,6 @@ const generateUsers = async () => {
     // Insert the generated users into the database
     await UserModel.insertMany(users);
     console.log('Users seeded successfully');
-  } catch (error) {
-    console.error('Error seeding the database:', error);
-  }
-};
-
-const generateAuths = async () => {
-  try {
-    await connectDB();
-    const auths = userNames.map((userName) => {
-      return new AuthModel({
-        access_token: uuidv4(),
-        expires_at: new Date(Date.now() + 30 * 60 * 1000),
-        refresh_token: uuidv4(),
-        token_type: 'Bearer',
-        user_name: userName,
-        created_at: new Date(),
-        updated_at: new Date(),
-      });
-    });
-    await AuthModel.insertMany(auths);
-    console.log('Auths seeded successfully');
   } catch (error) {
     console.error('Error seeding the database:', error);
   }
@@ -534,7 +487,6 @@ const deleteAllUsers = async () => await deleteAll(UserModel);
 // deleteAllUsers();
 // deleteAllCategories();
 // deleteAllOrders();
-// deleteAllMenus();
 // deleteAllIngredients();
 // deleteAllAuths();
 
@@ -554,17 +506,13 @@ const getCollectionData = async (model) => {
   }
 };
 
-const getCategories = async () => await getCollectionData(CategoryModel);
 const getOrders = async () => await getCollectionData(OrderModel);
-const getMenus = async () => await getCollectionData(MenuModel);
 const getUsers = async () => await getCollectionData(UserModel);
 const getIngredients = async () => await getCollectionData(IngredientModel);
 const getDishes = async () => await getCollectionData(DishModel);
-const getAuths = async () => await getCollectionData(AuthModel);
+const getAuths = async () => await getCollectionData(AuthModel); // need to add if no models found condition overall
 
-// getCategories();
 // getOrders();
-// getMenus();
 // getUsers();
 // getIngredients();
 // getDishes();
@@ -574,19 +522,19 @@ const getAuths = async () => await getCollectionData(AuthModel);
 const main = async () => {
   try {
     await connectDB();
+    await mongoose.connection.db.dropDatabase();
     await generateIngredients();
+    await generateDishes();
+    await generateOrders();
+    await generateUsers();
+    //
     // await getIngredientIds();
     // await deleteAllDishes();
-    await generateDishes();
     // await getDishIds();
-    await generateOrders();
-    await generateCategories();
     // await getCategories();
-    await generateMenus();
     // await deleteAllUsers();
-    await generateUsers();
     // await getUsers();
-    await generateAuths();
+    // await generateAuths();
   } catch (error) {
     console.error('Error during operations:', error);
   } finally {

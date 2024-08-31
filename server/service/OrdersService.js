@@ -1,11 +1,11 @@
-"use strict";
-const sortingUtils = require("../utils/sortingUtils");
-const problem = require("../utils/problem");
-const mongoose = require("mongoose");
-const OrderModel = mongoose.model("Order", require("../models/Order").Order);
-const DishModel = mongoose.model("Dish", require("../models/Dish").Dish);
-const AuthModel = mongoose.model("Auth", require("../models/Auth").Auth);
-const { Types } = require("mongoose");
+'use strict';
+const sortingUtils = require('../utils/sortingUtils');
+const problem = require('../utils/problem');
+const mongoose = require('mongoose');
+const OrderModel = mongoose.model('Order', require('../models/Order').Order);
+const DishModel = mongoose.model('Dish', require('../models/Dish').Dish);
+const AuthModel = mongoose.model('Auth', require('../models/Auth').Auth);
+const { Types } = require('mongoose');
 
 exports.postOrder = async function (body, token) {
   try {
@@ -14,7 +14,7 @@ exports.postOrder = async function (body, token) {
     if (!existingAuth) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token is invalid.",
+        'Bearer token is invalid.',
         401
       );
     }
@@ -22,22 +22,19 @@ exports.postOrder = async function (body, token) {
     if (new Date() > new Date(existingAuth.expires_at)) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token has expired.",
+        'Bearer token has expired.',
         401
       );
     }
 
     const existingOrder = await OrderModel.findOne({
-      $and: [
-        { given_name: body.given_name },
-        { table_number: body.table_number },
-      ],
+      $and: [{ name: body.name }, { table_number: body.table_number }],
     });
 
     if (existingOrder) {
       throw new problem.Problem(
         problem.E_CONFLICT,
-        "The provided given name is associated with an existing order for this table.",
+        'The provided name is associated with an existing order for this table.',
         409
       );
     }
@@ -50,7 +47,7 @@ exports.postOrder = async function (body, token) {
         if (!Types.ObjectId.isValid(dishId)) {
           throw new problem.Problem(
             problem.E_BAD_REQUEST,
-            "Invalid dish ID format. Ensure all dish IDs are valid Mongo database ObjectId strings.",
+            'Invalid dish ID format. Ensure all dish IDs are valid Mongo database ObjectId strings.',
             400
           );
         }
@@ -67,26 +64,25 @@ exports.postOrder = async function (body, token) {
       if (nonExistingDishIds.length > 0) {
         throw new problem.Problem(
           problem.E_NOT_FOUND,
-          "The requested resource does not exist.",
           `The following dish(es) do not exist: ${nonExistingDishIds.join(
-            ", "
+            ', '
           )}`,
           404
         );
       }
     }
-    if (!body.hasOwnProperty("scheduled_at")) {
+    if (!body.hasOwnProperty('scheduled_at')) {
       body.scheduled_at = null;
     }
     const order = new OrderModel(body);
-    order.status = "received";
+    order.status = 'received';
     order.priority = 3;
     order.created_at = new Date();
     order.updated_at = new Date();
     await order.save();
     return order.toResultFormat();
   } catch (error) {
-    console.error("Error encountered:", error);
+    console.error('Error encountered:', error);
     switch (error.status) {
       case 400:
         throw error;
@@ -99,18 +95,38 @@ exports.postOrder = async function (body, token) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
-exports.getOrderList = async function (sort, include, select, limit, offset) {
+exports.getOrderList = async function (
+  sort,
+  order,
+  fields,
+  filter,
+  limit,
+  offset
+) {
   try {
-    const sortOptions = sortingUtils.parseSortOptions(sort);
-    const selectOptions = sortingUtils.parseSelectOptions(include);
-    const filterOptions = sortingUtils.parseFilterOptions(select);
+    // DOESNT WORK:
+    // if ((sort && !priority) || (priority && !sort)) {
+    //   throw new problem.Problem(
+    //     problem.E_BAD_REQUEST,
+    //     'Both `sort` and `priority` must be defined together.',
+    //     400
+    //   );
+    // }
 
-    let ordersQuery = OrderModel.find(filterOptions, selectOptions);
+    if (filter && filter.includes('q.eq~')) {
+      filter = filter.replace('q.eq~', 'name.eq~');
+    }
+
+    const sortOptions = sortingUtils.parseSortOptions(sort, order);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+    const filterOptions = sortingUtils.parseFilterOptions(filter);
+
+    let ordersQuery = OrderModel.find(filterOptions, fieldsOptions);
 
     if (limit) {
       if (offset) {
@@ -121,22 +137,23 @@ exports.getOrderList = async function (sort, include, select, limit, offset) {
     }
 
     const orders = await ordersQuery.sort(sortOptions).exec();
+    const totalResults = await OrderModel.countDocuments(filterOptions);
 
     const response = {
       results: orders.map((order) => ({
-        order_id: order._id,
-        given_name: order.given_name,
+        id: order._id,
+        name: order.name,
         table_number: order.table_number,
         status: order.status,
         priority: order.priority,
         dish_ids: order.dish_ids,
+        special_requests: order.special_requests,
         created_at: order.created_at,
         updated_at: order.updated_at,
         scheduled_at: order.scheduled_at,
       })),
+      total_results: totalResults,
     };
-
-    response.total_results = orders.length;
     return response;
   } catch (error) {
     switch (error.status) {
@@ -145,37 +162,37 @@ exports.getOrderList = async function (sort, include, select, limit, offset) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.getOrder = async function getOrder(order_id, include) {
+exports.getOrder = async function getOrder(id, fields) {
   try {
-    if (!Types.ObjectId.isValid(order_id)) {
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "Invalid order ID format. Ensure the order ID is a valid Mongo database ObjectId string.",
+        'Invalid order ID format. Ensure the order ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const order = await OrderModel.findById(order_id);
+    const order = await OrderModel.findById(id);
     if (!order) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "Order not found. If you are unsure of the ID, try searching for the order by the table number and given name.",
+        'Order not found. If you are unsure of the ID, try searching for the order by the table number and name.',
         404
       );
     }
-    const selectOptions = sortingUtils.parseSelectOptions(include);
-    let ordersQuery = OrderModel.findById(order_id, selectOptions);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+    let ordersQuery = OrderModel.findById(id, fieldsOptions);
 
     const response = await ordersQuery.exec();
 
     return {
-      order_id: response._id,
-      given_name: response.given_name,
+      id: response._id,
+      name: response.name,
       table_number: response.table_number,
       status: response.status,
       priority: response.priority,
@@ -193,94 +210,89 @@ exports.getOrder = async function getOrder(order_id, include) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
-
-exports.getOrderDishes = async function (order_id, include) {
+exports.getOrderDishes = async function (
+  id,
+  sort,
+  order,
+  fields,
+  filter,
+  limit,
+  offset
+) {
   try {
-    if (!Types.ObjectId.isValid(order_id)) {
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "Invalid order ID format. Ensure the order ID is a valid Mongo database ObjectId string.",
+        'Invalid order ID format. Ensure the order ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const order = await OrderModel.findById(order_id);
-    if (!order) {
+
+    // Fetch the order by ID
+    const orderData = await OrderModel.findById(id);
+    if (!orderData) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "Order not found. If you are unsure of the ID, try searching for the order by table or and given_name.",
+        'Order not found. If you are unsure of the ID, try searching for the order by table or name.',
         404
       );
     }
+    if (filter && filter.includes('q.eq~')) {
+      filter = filter.replace('q.eq~', 'name.eq~');
+    }
 
-    // Fetch detailed dish information for each dish ID
+    const sortOptions = sortingUtils.parseSortOptions(sort, order);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+    const filterOptions = sortingUtils.parseFilterOptions(filter);
 
-    const dish_promises = order.dish_ids.map(async (dish_id) => {
-      try {
-        if (!Types.ObjectId.isValid(dish_id)) {
-          // Check if dish_id is a valid ObjectId
-          throw new problem.Problem(
-            problem.E_BAD_REQUEST,
-            `Invalid dish ID format: ${dish_id}. Ensure all dish IDs are valid Mongo database ObjectId strings.`,
-            400
-          );
-        }
+    // Query for the dishes associated with the order
+    let dishQuery = DishModel.find(
+      { _id: { $in: orderData.dish_ids }, ...filterOptions },
+      fieldsOptions
+    ).sort(sortOptions);
 
-        const selectOptions = sortingUtils.parseSelectOptions(include);
-        let dishQuery = DishModel.findById(dish_id);
+    if (limit) {
+      dishQuery = dishQuery.limit(limit).skip(offset || 0);
+    }
 
-        if (selectOptions) {
-          dishQuery = dishQuery.select(selectOptions);
-        }
-
-        const dish = await dishQuery.exec();
-
-        if (!dish) {
-          throw new problem.Problem(
-            problem.E_NOT_FOUND,
-            "The requested resource does not exist.",
-            `Dish with ID ${dish_id} not found. If you are unsure of the ID, try searching for the dish by name.`,
-            404
-          );
-        }
-
-        return dish.toResultFormat();
-      } catch (dish_error) {
-        throw dish_error;
-      }
+    const dishes = await dishQuery.exec();
+    const totalResults = await DishModel.countDocuments({
+      _id: { $in: orderData.dish_ids },
+      ...filterOptions,
     });
 
-    // Wait for all dish promises to resolve
-    const dishes = await Promise.all(dish_promises);
-
-    return { results: dishes };
+    // Build and return the response object
+    return {
+      results: dishes.map((dish) => dish.toResultFormat()),
+      total_results: totalResults,
+    };
   } catch (error) {
     switch (error.status) {
       case 400:
-        throw error;
       case 404:
         throw error;
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.putOrder = async function putOrder(body, order_id, token) {
+exports.putOrder = async function putOrder(body, id, token) {
   try {
     const existingAuth = await AuthModel.findOne({ access_token: token });
 
     if (!existingAuth) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token is invalid.",
+        'Bearer token is invalid.',
         401
       );
     }
@@ -288,40 +300,39 @@ exports.putOrder = async function putOrder(body, order_id, token) {
     if (new Date() > new Date(existingAuth.expires_at)) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token has expired.",
+        'Bearer token has expired.',
         401
       );
     }
-    
-    
-    if (!Types.ObjectId.isValid(order_id)) {
+
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "Invalid order ID format. Ensure the order ID is a valid Mongo database ObjectId string.",
+        'Invalid order ID format. Ensure the order ID is a valid Mongo database ObjectId string.',
         400
       );
     }
 
     // Retrieve the existing order from the database
-    const existingOrder = await OrderModel.findById(order_id);
+    const existingOrder = await OrderModel.findById(id);
     if (!existingOrder) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "Order not found. If you are unsure of the ID, try searching for the order by table number and given name.",
+        'Order not found. If you are unsure of the ID, try searching for the order by table number and name.',
         404
       );
     }
     // Validate required fields and generate error message
     let missingFields = [];
-    if (!body.status) missingFields.push("status");
-    if (!body.priority) missingFields.push("priority");
-    if (!body.dish_ids) missingFields.push("dish_ids");
+    if (!body.status) missingFields.push('status');
+    if (!body.priority) missingFields.push('priority');
+    if (!body.dish_ids) missingFields.push('dish_ids');
 
     if (missingFields.length > 0) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
         `The following required fields are missing: ${missingFields.join(
-          ", "
+          ', '
         )}.`,
         400
       );
@@ -348,20 +359,20 @@ exports.putOrder = async function putOrder(body, order_id, token) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.deleteOrder = async function (order_id, token) {
+exports.deleteOrder = async function (id, token) {
   try {
     const existingAuth = await AuthModel.findOne({ access_token: token });
 
     if (!existingAuth) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token is invalid.",
+        'Bearer token is invalid.',
         401
       );
     }
@@ -369,27 +380,27 @@ exports.deleteOrder = async function (order_id, token) {
     if (new Date() > new Date(existingAuth.expires_at)) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token has expired.",
+        'Bearer token has expired.',
         401
       );
     }
-    
-    if (!Types.ObjectId.isValid(order_id)) {
+
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "Invalid order ID format. Ensure the order ID is a valid Mongo database ObjectId string.",
+        'Invalid order ID format. Ensure the order ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const order = await OrderModel.findById(order_id);
+    const order = await OrderModel.findById(id);
     if (!order) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "Order not found. If you are unsure of the ID, try searching for the order by table number and given name.",
+        'Order not found. If you are unsure of the ID, try searching for the order by table number and name.',
         404
       );
     }
-    await OrderModel.deleteOne({ _id: order_id });
+    await OrderModel.deleteOne({ _id: id });
   } catch (error) {
     switch (error.status) {
       case 400:
@@ -401,7 +412,7 @@ exports.deleteOrder = async function (order_id, token) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }

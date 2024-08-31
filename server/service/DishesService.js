@@ -1,16 +1,16 @@
-"use strict";
+'use strict';
 
-const sortingUtils = require("../utils/sortingUtils");
-const problem = require("../utils/problem");
-const mongoose = require("mongoose");
-const DishModel = mongoose.model("Dish", require("../models/Dish").Dish);
+const sortingUtils = require('../utils/sortingUtils');
+const problem = require('../utils/problem');
+const mongoose = require('mongoose');
+const DishModel = mongoose.model('Dish', require('../models/Dish').Dish);
 const IngredientModel = mongoose.model(
-  "Ingredient",
-  require("../models/Ingredient").Ingredient
+  'Ingredient',
+  require('../models/Ingredient').Ingredient
 );
-const AuthModel = mongoose.model("Auth", require("../models/Auth").Auth);
+const AuthModel = mongoose.model('Auth', require('../models/Auth').Auth);
 
-const { Types } = require("mongoose");
+const { Types } = require('mongoose');
 
 exports.postDishes = async function (body, token) {
   try {
@@ -19,7 +19,7 @@ exports.postDishes = async function (body, token) {
     if (!existingAuth) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token is invalid.",
+        'Bearer token is invalid.',
         401
       );
     }
@@ -27,7 +27,7 @@ exports.postDishes = async function (body, token) {
     if (new Date() > new Date(existingAuth.expires_at)) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token has expired.",
+        'Bearer token has expired.',
         401
       );
     }
@@ -37,8 +37,8 @@ exports.postDishes = async function (body, token) {
     if (existingDish) {
       throw new problem.Problem(
         problem.E_CONFLICT,
-        "The provided name corresponds to a resource instance in the database.",
-        "Dish already exists. Update the existing dish or create a new dish.",
+        'The provided name corresponds to a resource instance in the database.',
+        'Dish already exists. Update the existing dish or create a new dish.',
         409
       );
     }
@@ -49,8 +49,8 @@ exports.postDishes = async function (body, token) {
         if (!Types.ObjectId.isValid(ingredient.ingredient_id)) {
           throw new problem.Problem(
             problem.E_BAD_REQUEST,
-            "The request was malformed or invalid.",
-            "Invalid ingredient ID format. Ensure all ingredient IDs are valid Mongo database ObjectId strings.",
+            'The request was malformed or invalid.',
+            'Invalid ingredient ID format. Ensure all ingredient IDs are valid Mongo database ObjectId strings.',
             400
           );
         }
@@ -61,13 +61,13 @@ exports.postDishes = async function (body, token) {
         if (!foundIngredient) {
           throw new problem.Problem(
             problem.E_NOT_FOUND,
-            "A requested resource does not exist.",
+            'A requested resource does not exist.',
             `Ingredient with ID ${ingredient.ingredient_id} not found.`,
             404
           );
         }
         return {
-          id: foundIngredient._id.toString(),
+          ingredient_id: foundIngredient._id.toString(),
           name: foundIngredient.name,
           is_essential: ingredient.is_essential,
           in_stock_qty: foundIngredient.in_stock_qty,
@@ -83,10 +83,10 @@ exports.postDishes = async function (body, token) {
     if (insufficientEssentialIngredients.length > 0) {
       const ingredientNames = insufficientEssentialIngredients
         .map((ingredient) => `${ingredient.name} (ID: ${ingredient.id})`)
-        .join(", ");
+        .join(', ');
       throw new problem.Problem(
         problem.E_CLIENT_FAULT,
-        "The request was malformed or invalid.",
+        'The request was malformed or invalid.',
         `The following essential ingredients are out of stock: ${ingredientNames}`,
         400
       );
@@ -110,21 +110,36 @@ exports.postDishes = async function (body, token) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "Internal server error",
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.getDishList = async function (sort, include, select, limit, offset) {
+// i need update. if (filter === 'q'), then it needs to search for all DishModels, look for matchcing on the `name` property. For example: http://localhost:8080/dishes?filter=q.eq~Barbacos. It will search for DishModels
+// that have Barbacos in the name.
+
+exports.getDishList = async function (
+  sort,
+  order,
+  fields,
+  filter,
+  limit,
+  offset
+) {
   try {
+    if (filter && filter.includes('q.eq~')) {
+      filter = filter.replace('q.eq~', 'name.eq~');
+    }
 
-    const sortOptions = sortingUtils.parseSortOptions(sort);
-    const selectOptions = sortingUtils.parseSelectOptions(include);
-    const filterOptions = sortingUtils.parseFilterOptions(select);
+    console.log('the new filter value looks like:', filter);
 
-    let dishesQuery = DishModel.find(filterOptions, selectOptions);
+    const filterOptions = sortingUtils.parseFilterOptions(filter);
+
+    const sortOptions = sortingUtils.parseSortOptions(sort, order);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+
+    let dishesQuery = DishModel.find(filterOptions, fieldsOptions);
 
     if (limit) {
       if (offset) {
@@ -135,23 +150,25 @@ exports.getDishList = async function (sort, include, select, limit, offset) {
     }
 
     const dishes = await dishesQuery.sort(sortOptions).exec();
+    const totalResults = await DishModel.countDocuments(filterOptions);
+    // response.total_results = dishes.length;
 
     const response = {
       results: dishes.map((dish) => ({
-        dish_id: dish._id,
+        id: dish._id,
         created_at: dish.created_at,
         updated_at: dish.updated_at,
         name: dish.name,
         description: dish.description,
+        category: dish.category,
+        preparation_time: dish.preparation_time,
         price: dish.price,
         image_name: dish.image_name,
         station: dish.station,
         ingredients: dish.ingredients,
       })),
+      total_results: totalResults,
     };
-
-    // Set total_results to the number of dishes returned in the response
-    response.total_results = dishes.length;
 
     return response;
   } catch (error) {
@@ -159,44 +176,44 @@ exports.getDishList = async function (sort, include, select, limit, offset) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "Internal server error",
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.getDish = async function getDish(dish_id, include) {
+exports.getDish = async function getDish(id, fields) {
   try {
-    if (!Types.ObjectId.isValid(dish_id)) {
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "The request was malformed or invalid.",
-        "Invalid dish ID format. Ensure the dish ID is a valid Mongo database ObjectId string.",
+        'Invalid dish ID format. Ensure the dish ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const dish = await DishModel.findById(dish_id);
+    const dish = await DishModel.findById(id);
     if (!dish) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "The requested resource does not exist.",
-        "Dish not found. If you are unsure of the ID, try searching for the dish by name.",
+        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
         404
       );
     }
-    const selectOptions = sortingUtils.parseSelectOptions(include);
-    let dishsQuery = DishModel.findById(dish_id, selectOptions);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+
+    let dishsQuery = DishModel.findById(id, fieldsOptions);
 
     const response = await dishsQuery.exec();
 
     return {
-      dish_id: response._id,
+      id: response._id,
       created_at: response.created_at,
       updated_at: response.updated_at,
       name: response.name,
       description: response.description,
+      category: response.category,
       price: response.price,
+      preparation_time: response.preparation_time,
       image_name: response.image_name,
       station: response.station,
       ingredients: response.ingredients,
@@ -210,30 +227,36 @@ exports.getDish = async function getDish(dish_id, include) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "Internal server error",
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
-
-exports.getDishIngredients = async function (dish_id, include) {
+exports.getDishIngredients = async function (
+  id,
+  sort,
+  order,
+  fields,
+  filter,
+  limit,
+  offset
+) {
   try {
-    if (!Types.ObjectId.isValid(dish_id)) {
+    // Validate the dish ID
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "The request was malformed or invalid.",
         `Invalid dish ID format. Ensure the dish ID is a valid Mongo database ObjectId string.`,
         400
       );
     }
 
-    const dish = await DishModel.findById(dish_id);
+    // Fetch the dish by ID
+    const dish = await DishModel.findById(id);
     if (!dish) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "The requested resource does not exist.",
-        "Dish not found. If you are unsure of the ID, try searching for the dish by name.",
+        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
         404
       );
     }
@@ -242,72 +265,179 @@ exports.getDishIngredients = async function (dish_id, include) {
     if (!Array.isArray(dish.ingredients) || dish.ingredients.length === 0) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "The requested resource does not exist.",
-        "Dish does not have any ingredients.",
+        'Dish does not have any ingredients.',
         404
       );
     }
 
-    // Fetch detailed dish information for each ingredient
-    const ingredient_promises = dish.ingredients.map(async (ingredientObj) => {
-      if (!Types.ObjectId.isValid(ingredientObj.ingredient_id)) {
-        // Check if dish_id is a valid ObjectId
-        throw new problem.Problem(
-          problem.E_BAD_REQUEST,
-          "The request was malformed or invalid.",
-          `Invalid ingredient ID format: ${ingredient_id}. Ensure all ingredient IDs are valid Mongo database ObjectId strings.`,
-          400
-        );
-      }
-      try {
-        const ingredient_id = ingredientObj.ingredient_id;
-        const selectOptions = sortingUtils.parseSelectOptions(include);
-        let ingredientQuery = IngredientModel.findById(ingredient_id);
+    if (filter && filter.includes('q.eq~')) {
+      filter = filter.replace('q.eq~', 'name.eq~');
+    }
+    // Parse the sort, order, fields, and filter options
+    const sortOptions = sortingUtils.parseSortOptions(sort, order);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+    const filterOptions = sortingUtils.parseFilterOptions(filter);
 
-        if (selectOptions) {
-          ingredientQuery = ingredientQuery.select(selectOptions);
-        }
-
-        const ingredient = await ingredientQuery.exec();
-        return ingredient ? ingredient.toResultFormat() : null;
-      } catch (ingredient_error) {
-        throw ingredient_error;
-      }
+    // Count the total number of matching ingredients
+    const totalResults = await IngredientModel.countDocuments({
+      _id: {
+        $in: dish.ingredients.map(
+          (ingredientObj) => ingredientObj.ingredient_id
+        ),
+      },
+      ...filterOptions,
     });
 
-    // Wait for all ingredient promises to resolve
-    const ingredients = await Promise.all(ingredient_promises);
+    // Fetch and filter ingredients
+    let ingredientsQuery = IngredientModel.find({
+      _id: {
+        $in: dish.ingredients.map(
+          (ingredientObj) => ingredientObj.ingredient_id
+        ),
+      },
+      ...filterOptions,
+    });
 
-    // Remove any null values from ingredients array
-    const validIngredients = ingredients.filter(
-      (ingredient) => ingredient !== null
-    );
+    if (fieldsOptions) {
+      ingredientsQuery = ingredientsQuery.select(fieldsOptions);
+    }
 
-    return { results: validIngredients };
+    if (limit) {
+      if (offset) {
+        ingredientsQuery = ingredientsQuery.skip(offset).limit(limit);
+      } else {
+        ingredientsQuery = ingredientsQuery.limit(limit);
+      }
+    }
+
+    const ingredients = await ingredientsQuery.sort(sortOptions).exec();
+
+    // Return the results with total_results
+    return {
+      total_results: totalResults,
+      results: ingredients.map((ingredient) => ingredient.toResultFormat()),
+    };
   } catch (error) {
     switch (error.status) {
       case 400:
-        throw error;
       case 404:
         throw error;
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "Internal server error",
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
+        );
+    }
+  }
+};
+exports.getDishIngredients = async function (
+  id,
+  sort,
+  order,
+  fields,
+  filter,
+  limit,
+  offset
+) {
+  try {
+    // Validate the dish ID
+    if (!Types.ObjectId.isValid(id)) {
+      throw new problem.Problem(
+        problem.E_BAD_REQUEST,
+        `Invalid dish ID format. Ensure the dish ID is a valid Mongo database ObjectId string.`,
+        400
+      );
+    }
+
+    // Fetch the dish by ID
+    const dish = await DishModel.findById(id);
+    if (!dish) {
+      throw new problem.Problem(
+        problem.E_NOT_FOUND,
+        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
+        404
+      );
+    }
+
+    // Ensure dish.ingredients is an array and not empty
+    if (!Array.isArray(dish.ingredients) || dish.ingredients.length === 0) {
+      throw new problem.Problem(
+        problem.E_NOT_FOUND,
+        'Dish does not have any ingredients.',
+        404
+      );
+    }
+
+    if (filter && filter.includes('.eq~q') && filter.endsWith('.eq~q')) {
+      filter = filter.replace('.eq~q', '.eq~name');
+    }
+
+    // Parse the sort, order, fields, and filter options
+    const sortOptions = sortingUtils.parseSortOptions(sort, order);
+    const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
+    const filterOptions = sortingUtils.parseFilterOptions(filter);
+
+    // Count the total number of matching ingredients
+    const totalResults = await IngredientModel.countDocuments({
+      _id: {
+        $in: dish.ingredients.map(
+          (ingredientObj) => ingredientObj.ingredient_id
+        ),
+      },
+      ...filterOptions,
+    });
+
+    // Fetch and filter ingredients
+    let ingredientsQuery = IngredientModel.find({
+      _id: {
+        $in: dish.ingredients.map(
+          (ingredientObj) => ingredientObj.ingredient_id
+        ),
+      },
+      ...filterOptions,
+    });
+
+    if (fieldsOptions) {
+      ingredientsQuery = ingredientsQuery.select(fieldsOptions);
+    }
+
+    if (limit) {
+      if (offset) {
+        ingredientsQuery = ingredientsQuery.skip(offset).limit(limit);
+      } else {
+        ingredientsQuery = ingredientsQuery.limit(limit);
+      }
+    }
+
+    const ingredients = await ingredientsQuery.sort(sortOptions).exec();
+
+    // Return the results with total_results
+    return {
+      results: ingredients.map((ingredient) => ingredient.toResultFormat()),
+      total_results: totalResults,
+    };
+  } catch (error) {
+    switch (error.status) {
+      case 400:
+      case 404:
+        throw error;
+      default:
+        throw new problem.Problem(
+          problem.E_SERVER_FAULT,
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.putDish = async function (body, dish_id, token) {
+exports.putDish = async function (body, id, token) {
   try {
     const existingAuth = await AuthModel.findOne({ access_token: token });
 
     if (!existingAuth) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token is invalid.",
+        'Bearer token is invalid.',
         401
       );
     }
@@ -315,37 +445,34 @@ exports.putDish = async function (body, dish_id, token) {
     if (new Date() > new Date(existingAuth.expires_at)) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token has expired.",
+        'Bearer token has expired.',
         401
       );
     }
-    if (!Types.ObjectId.isValid(dish_id)) {
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "The request was malformed or invalid.",
-        "Invalid dish ID format. Ensure the dish ID is a valid Mongo database ObjectId string.",
+        'Invalid dish ID format. Ensure the dish ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const existingDish = await DishModel.findById(dish_id);
+    const existingDish = await DishModel.findById(id);
     if (!existingDish) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "The requested resource does not exist.",
-        "Dish not found. If you are unsure of the ID, try searching for the dish by name.",
+        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
         404
       );
     }
 
     const conflictingDish = await DishModel.findOne({
-      _id: { $ne: dish_id },
+      _id: { $ne: id },
       name: body.name,
     });
 
     if (conflictingDish) {
       throw new problem.Problem(
         problem.E_CONFLICT,
-        "The provided name corresponds to a resource instance in the database.",
         "Name is already used for an existing dish. Update the existing dish's details instead of creating a new dish.",
         409
       );
@@ -357,8 +484,7 @@ exports.putDish = async function (body, dish_id, token) {
         if (!Types.ObjectId.isValid(ingredient.ingredient_id)) {
           throw new problem.Problem(
             problem.E_BAD_REQUEST,
-            "The request was malformed or invalid.",
-            "Invalid ingredient ID format. Ensure all ingredient IDs are valid Mongo database ObjectId strings.",
+            'Invalid ingredient ID format. Ensure all ingredient IDs are valid Mongo database ObjectId strings.',
             400
           );
         }
@@ -369,13 +495,12 @@ exports.putDish = async function (body, dish_id, token) {
         if (!foundIngredient) {
           throw new problem.Problem(
             problem.E_NOT_FOUND,
-            "A requested resource does not exist.",
             `Ingredient with ID ${ingredient.ingredient_id} not found.`,
             404
           );
         }
         return {
-          id: foundIngredient._id.toString(),
+          ingredient_id: foundIngredient._id.toString(),
           name: foundIngredient.name,
           is_essential: ingredient.is_essential,
           in_stock_qty: foundIngredient.in_stock_qty,
@@ -390,10 +515,9 @@ exports.putDish = async function (body, dish_id, token) {
     if (insufficientEssentialIngredients.length > 0) {
       const ingredientNames = insufficientEssentialIngredients
         .map((ingredient) => `${ingredient.name} (ID: ${ingredient.id})`)
-        .join(", ");
+        .join(', ');
       throw new problem.Problem(
         problem.E_CLIENT_FAULT,
-        "The request was malformed or invalid.",
         `The following essential ingredients are out of stock: ${ingredientNames}`,
         400
       );
@@ -419,21 +543,20 @@ exports.putDish = async function (body, dish_id, token) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "Internal server error",
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
 };
 
-exports.deleteDish = async function (dish_id, token) {
+exports.deleteDish = async function (id, token) {
   try {
     const existingAuth = await AuthModel.findOne({ access_token: token });
 
     if (!existingAuth) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token is invalid.",
+        'Bearer token is invalid.',
         401
       );
     }
@@ -441,28 +564,26 @@ exports.deleteDish = async function (dish_id, token) {
     if (new Date() > new Date(existingAuth.expires_at)) {
       throw new problem.Problem(
         problem.E_UNAUTHORIZED,
-        "Bearer token has expired.",
+        'Bearer token has expired.',
         401
       );
     }
-    if (!Types.ObjectId.isValid(dish_id)) {
+    if (!Types.ObjectId.isValid(id)) {
       throw new problem.Problem(
         problem.E_BAD_REQUEST,
-        "The request was malformed or invalid.",
-        "Invalid dish ID format. Ensure the dish ID is a valid Mongo database ObjectId string.",
+        'Invalid dish ID format. Ensure the dish ID is a valid Mongo database ObjectId string.',
         400
       );
     }
-    const dish = await DishModel.findById(dish_id);
+    const dish = await DishModel.findById(id);
     if (!dish) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        "The requested resource does not exist.",
-        "Dish not found. If you are unsure of the ID, try searching for the dish by name.",
+        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
         404
       );
     }
-    await DishModel.deleteOne({ _id: dish_id });
+    await DishModel.deleteOne({ _id: id });
   } catch (error) {
     switch (error.status) {
       case 400:
@@ -474,8 +595,7 @@ exports.deleteDish = async function (dish_id, token) {
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
-          "Internal server error",
-          "There was an issue originating from the service layer of the API server. Report the issue to API support."
+          'There was an issue originating from the service layer of the API server. Report the issue to API support.'
         );
     }
   }
