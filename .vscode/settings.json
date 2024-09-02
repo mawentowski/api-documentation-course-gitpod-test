@@ -10,7 +10,5 @@
     "source.fixAll.eslint": "always"
   },
 
-  // Recommended by Raymond
-  "terminal.integrated.defaultProfile.windows": "Git Bash",
-  "files.eol": "\n"
+  "terminal.integrated.defaultProfile.windows": "Git Bash"
 }
