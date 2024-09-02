@@ -192,6 +192,14 @@ The `setup.sh` script automates the setup of this repository by handling tasks l
 1. Open a terminal (For Windows, a Git Bash terminal) in VS Code.
 1. Make the script executable and run it:
 
+<comment>
+By default, Git tracks user-level execute permissions of a file. So as long as you have marked the file as
+user-executable before pushing it to the remove copy of the repo, Git should recreate the setup.sh file on
+the machine of another user who clones the repo with permissions that allow the user to execute it. That appears
+to be the case now. I see `-rwxr-xr-x` for the file's permissions on my Windows machine (file permissions emulated
+in Git Bash, as Windows does not have per-file permissions), and I have not modified it. So I think this step is
+going to be unnecessary in the vast majority of cases.
+</comment>
 ```shell
 chmod +x setup.sh
 ./setup.sh
