@@ -15,16 +15,28 @@ To import Postman collections and environment variables from the `postman` direc
 <comment>
 It might be worth noting that the user must create a Postman account and log into that account via the app
 in order to unlock the ability to import collections through any means other than a cURL command ("Paste cURL to import...").
+Might also be worth ensuring Windows users that it is OK to click Allow Access if they encounter this [dialog](../windows_defender_firewall_2.PNG).
 </comment>
    - In the Import dialog, choose the **Upload Files** tab.
+  <comment>
+  My version of Postman on Windows reads "Drop anywhere to import Or select _files_ or _folders_."
+  _files_ and _folders_ being clickable options.
+  </comment>
    - Click on **Choose Files** and navigate to your `postman` directory.
 
-3. **Choose the Collection File:**
+1. **Choose the Collection File:**
    - Select the `postman-collection.json` file and click **Open**.
    - Postman will upload and import the collection. You will see a confirmation once the import is successful.
 
 ### 3. **Import Environment Variables**
+<comment>
+I do not see an "Add a New Environment" option in the Environments drop-down at the top-right.
+I do see a Create Environment option in the Environments tab on the left, but that seems to create an environment
+from scratch via the Postman UI rather than via a file import.
+Take a look at this screen capture [image](../postman.PNG).
 
+I was able to create a new environment by importing the file in the exact same manner I imported the file for the collection.
+</comment>
 1. **Open the Environments Menu:**
 
    - Click on the **Environments** dropdown in the top-right corner of the Postman app or go to the **Manage Environments** option by clicking on the gear icon.
