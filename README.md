@@ -247,6 +247,25 @@ the Allow Access button.
 ./scripts/run-slides.sh
 ```
 
+<comment>
+Just some comments on the slides:
+
+---
+
+You may want to update the page title form "reveal.js" to something else.
+
+---
+
+In several cases, I had to press the > button twice before additional text appeared.
+
+For example, when one of the slides shows the following text:
+
+```Looking ahead: tech writing and AI
+
+AI will likely augment technical writing roles rather than fully replace them. This role could expand to include: 
+```
+
+</comment>
 3. If the script runs successfully, a link to the slides will be displayed. Click the link or visit [http://localhost:8001](http://localhost:8001) to view the slides in your browser.
 
 **Tip:** Press `Escape` to view an overview of the slide sections, making navigation easier.
@@ -267,6 +286,9 @@ The Admin panel is a frontend CRUD (Create-Read-Update-Delete) application that 
 
 3. If the script runs successfully, a link to the Admin panel will be displayed. Click the link or visit [http://localhost:5173/](http://localhost:5173/) to view the admin panel in your browser.
 
+<comment>
+When finished viewing the admin panel, not the slides.
+</comment>
 When you're finished viewing the slides, stop the server by pressing `Ctrl + C` in the same terminal where you ran the script.
 
 ## Pulling Changes
@@ -299,4 +321,7 @@ To confirm that you’ve successfully set up everything, please post the followi
 - [x] Set up and configured Postman
 ```
 
+<comment>
+Typo at the end of this line.
+</comment>
 Once you’ve completed all items on the checklist, you’ll be ready for the next steps. Wait for further instructions from your instructo

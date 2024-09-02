@@ -12,7 +12,10 @@ To import Postman collections and environment variables from the `postman` direc
    - Click on the **Import** button located in the top-left corner of the Postman app or use the shortcut `Ctrl + O` (Windows/Linux) or `Cmd + O` (Mac).
 
 2. **Select the File:**
-
+<comment>
+It might be worth noting that the user must create a Postman account and log into that account via the app
+in order to unlock the ability to import collections through any means other than a cURL command ("Paste cURL to import...").
+</comment>
    - In the Import dialog, choose the **Upload Files** tab.
    - Click on **Choose Files** and navigate to your `postman` directory.
 
