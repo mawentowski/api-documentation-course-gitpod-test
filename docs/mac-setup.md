@@ -87,14 +87,21 @@ distributions. So I use bash v5 that I installed via Homebrew, not zsh or bash v
 recommend that your MacOS users switch over to bash v5. zsh is apparently nearly perfectyl backwards compatible with bash v5,
 so your users should have no problem executing shell scripts intended for bash v5 in zsh.
 
-Anyway, zsh refers to different config files than bash. It uses `.zsh_profile` rather than `.bash_profile`, and `.zshrc` rather
+Anyway, zsh refers to different config files than bash. It uses `.z_profile` rather than `.bash_profile`, and `.zshrc` rather
 than `.bashrc.`
+
+In a perfect world, I would insist on a setup that guaranteed that all users leveraged the same major version of the same
+shell implementation, but again, in this case, it's probably not worth the potential headache the setup might cause
+your non-technical users. So I guess I'm recommending that you make the relatively safe assumption that all your MacOS users
+will be using zsh, not bash, and remove any mention of bash from instructions you provide them.
 </comment>
+
 ## 4. **Configure SSH Agent in `.bash_profile`**
 
 1. **Open Your `.bash_profile`:**
 
    - In Terminal, run:
+
      ```bash
      nano ~/.bash_profile
      ```
@@ -102,32 +109,36 @@ than `.bashrc.`
 2. **Add SSH Agent Configuration:**
 
    - Add these lines to the bottom of the file:
+
      ```bash
      # Start the SSH agent
      eval "$(ssh-agent -s)"
      # Add your SSH private key to the agent
      ssh-add ~/.ssh/id_rsa
      ```
+
    - Press `Ctrl + O` to save, then `Ctrl + X` to exit `nano`.
 
 <comment>
-This step is not needed if the user opens a new Bash process in terminal as part of Step 4,
-assuming they have a command similar to this oen in their `~/.bash_profile`, which they really ought
-to.
+This step is not needed if the user opens a new zsh process in terminal as part of Step 4,
+assuming they have a command similar to this one in their `~/.z_profile`, which probably really ought
+to. Check your `~/.z_profile` for reference.
 ```shell
-test -f ~/.bashrc && . ~/.bashrc
+test -f ~/.zshrc && . ~/.zshrc
 ```
 I think you should get rid of this step and modify Step 4 to require the user to open a fresh terminal.
 </comment>
 1. **Source the `.bash_profile`:**
 
-   - Apply the changes by running:
+- Apply the changes by running:
+
      ```bash
      source ~/.bash_profile
      ```
 
 2. **Verify SSH Agent:**
    - Run the following to check if the SSH agent is running and your key is added:
+
      ```bash
      ssh-add -l
      ```
@@ -137,6 +148,7 @@ I think you should get rid of this step and modify Step 4 to require the user to
 1. **Open Your `.zshrc`:**
 
    - In Terminal, run:
+
      ```bash
      nano ~/.zshrc
      ```
@@ -144,27 +156,38 @@ I think you should get rid of this step and modify Step 4 to require the user to
 2. **Add SSH Agent Configuration:**
 
    - Add these lines to the bottom of the file:
+
      ```bash
      # Start the SSH agent
      eval "$(ssh-agent -s)"
      # Add your SSH private key to the agent
      ssh-add ~/.ssh/id_rsa
      ```
+
    - Press `Ctrl + O` to save, then `Ctrl + X` to exit `nano`.
 
 3. **Source the `.zshrc`:**
 
    - Apply the changes by running:
+
      ```bash
      source ~/.zshrc
      ```
 
 4. **Verify SSH Agent:**
    - Run the following to check if the SSH agent is running and your key is added:
+
      ```bash
      ssh-add -l
      ```
 
+<comment>
+For non-technical users, I would just send them to https://nodejs.org to download an installer app, just as you
+recommend in your instructions for Windows users.
+
+Developers and other tech-savvy users will acquire Node.js via nvm (the Homebrew installation of which is not supported 
+by the nvm team).
+</comment>
 ## 6. **Install Additional Tools**
 
 1. **Homebrew:**
