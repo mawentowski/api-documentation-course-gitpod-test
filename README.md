@@ -198,10 +198,17 @@ user-executable before pushing it to the remove copy of the repo, Git should rec
 the machine of another user who clones the repo with permissions that allow the user to execute it. That appears
 to be the case now. I see `-rwxr-xr-x` for the file's permissions on my Windows machine (file permissions emulated
 in Git Bash, as Windows does not have per-file permissions), and I have not modified it. So I think this step is
-going to be unnecessary in the vast majority of cases.
+going to be unnecessary in most cases.
+
+I also think the scripts/make-sh-exectable.sh script is unnecessary is most cases for the same reason.
 </comment>
+
 ```shell
 chmod +x setup.sh
+<comment>
+This command executed with a code of 1 after writing this to stdout: "Error: 'formatter' directory not found."
+I don't see a formatter directory at the root of the source repo.
+</comment>
 ./setup.sh
 ```
 
@@ -229,11 +236,16 @@ This repository contains the slides the instructor uses to present the course.
 
 1. Open a _new_ terminal in VS Code (use Git Bash if you're on Windows).
 
+<comment>
+After running this command, I encountered this [dialog](./windows_defender_firewall.PNG) in Windows.
+You might want to mention this dialog in the documentation and ensure the read that it's OK to click
+the Allow Access button.
+</comment>
 2. Run the following script:
 
-   ```shell
-   ./scripts/run-slides.sh
-   ```
+```shell
+./scripts/run-slides.sh
+```
 
 3. If the script runs successfully, a link to the slides will be displayed. Click the link or visit [http://localhost:8001](http://localhost:8001) to view the slides in your browser.
 
