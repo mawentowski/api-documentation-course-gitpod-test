@@ -1,3 +1,7 @@
+<comment>
+I recommend [Markdownlint](https://github.com/markdownlint/markdownlint) for md files, if you're interested.
+</comment>
+
 # API Documentation Course
 
 Welcome to the API Documentation course! This repository contains everything you need to test and document the course API.
@@ -106,6 +110,12 @@ For example:
 
 Remember to follow the issue template in the [Getting Help](#getting-help) section of this README.
 
+<command>
+I've registed these a "recommend extensions" in ./vscode/extensions.json. So all your users need to do is
+select the "Extensions: Show Recommended Extensions" option in the VS Code palette (Ctrl + Shift + P on Windows),
+which opens the EXTENSIONS pane with a search term of "@recommended". They'll just need to click the Install button
+beneath each of the search results.
+</command>
 ## Configuring Visual Studio Code
 
 1. Open Visual Studio Code.
@@ -269,4 +279,4 @@ To confirm that you’ve successfully set up everything, please post the followi
 - [x] Set up and configured Postman
 ```
 
-Once you’ve completed all items on the checklist, you’ll be ready for the next steps. Wait for further instructions from your instructor.
+Once you’ve completed all items on the checklist, you’ll be ready for the next steps. Wait for further instructions from your instructo
