@@ -10,8 +10,5 @@
     "source.fixAll.eslint": "always"
   },
 
-  // Optional: Configure Prettier settings
-  "prettier.singleQuote": true,
-  "prettier.trailingComma": "es5",
-  "prettier.tabWidth": 2
+  "terminal.integrated.defaultProfile.windows": "Git Bash"
 }

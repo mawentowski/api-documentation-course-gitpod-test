@@ -106,6 +106,12 @@ For example:
 
 Remember to follow the issue template in the [Getting Help](#getting-help) section of this README.
 
+<command>
+I've registed these a "recommend extensions" in ./vscode/extensions.json. So all your users need to do is
+select the "Extensions: Show Recommended Extensions" option in the VS Code palette (Ctrl + Shift + P on Windows),
+which opens the EXTENSIONS pane with a search term of "@recommended". They'll just need to click the Install button
+beneath each of the search results.
+</command>
 ## Configuring Visual Studio Code
 
 1. Open Visual Studio Code.
@@ -183,7 +189,6 @@ The `setup.sh` script automates the setup of this repository by handling tasks l
 1. Make the script executable and run it:
 
 ```shell
-chmod +x setup.sh
 ./setup.sh
 ```
 
@@ -213,9 +218,13 @@ This repository contains the slides the instructor uses to present the course.
 
 2. Run the following script:
 
-   ```shell
-   ./scripts/run-slides.sh
-   ```
+```shell
+./scripts/run-slides.sh
+```
+
+After running this command, you may encounter a dialog in Windows. This dialog is a prompt from Windows Defender Firewall.
+
+Click the **Allow Access** button to avoid any issues with the application's connectivity.
 
 3. If the script runs successfully, a link to the slides will be displayed. Click the link or visit [http://localhost:8001](http://localhost:8001) to view the slides in your browser.
 
@@ -237,7 +246,7 @@ The Admin panel is a frontend CRUD (Create-Read-Update-Delete) application that 
 
 3. If the script runs successfully, a link to the Admin panel will be displayed. Click the link or visit [http://localhost:5173/](http://localhost:5173/) to view the admin panel in your browser.
 
-When you're finished viewing the slides, stop the server by pressing `Ctrl + C` in the same terminal where you ran the script.
+When you're finished viewing the admin panel, stop the server by pressing `Ctrl + C` in the same terminal where you ran the script.
 
 ## Pulling Changes
 
