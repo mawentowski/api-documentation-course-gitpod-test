@@ -4,21 +4,21 @@
 echo "Navigating to project root directory..."
 cd "$(dirname "$0")/.."  # Go up one level to reach the root directory
 
-# Navigate to the 'formatter' directory
-if [ -d "formatter" ]; then
-  echo "Navigating to the 'formatter' directory..."
-  cd formatter
+# Navigate to the 'converter' directory
+if [ -d "converter" ]; then
+  echo "Navigating to the 'converter' directory..."
+  cd converter
 else
-  echo "Error: 'formatter' directory not found."
+  echo "Error: 'converter' directory not found."
   exit 1
 fi
 
-# Find and make all .sh files in the 'formatter' directory executable
-echo "Making .sh files in 'formatter' directory executable..."
+# Find and make all .sh files in the 'converter' directory executable
+echo "Making .sh files in 'converter' directory executable..."
 sh_files=$(find . -name "*.sh")
 
 if [ -z "$sh_files" ]; then
-  echo "No .sh files found in the 'formatter' directory."
+  echo "No .sh files found in the 'converter' directory."
 else
   for file in $sh_files; do
     chmod +x "$file"
@@ -29,7 +29,7 @@ else
       exit 1
     fi
   done
-  echo "All .sh files in 'formatter' directory are now executable."
+  echo "All .sh files in 'converter' directory are now executable."
 fi
 
 # Navigate to the 'scripts' directory

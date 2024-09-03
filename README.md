@@ -1,7 +1,3 @@
-<comment>
-I recommend [Markdownlint](https://github.com/markdownlint/markdownlint) for md files, if you're interested.
-</comment>
-
 # API Documentation Course
 
 Welcome to the API Documentation course! This repository contains everything you need to test and document the course API.
@@ -192,23 +188,7 @@ The `setup.sh` script automates the setup of this repository by handling tasks l
 1. Open a terminal (For Windows, a Git Bash terminal) in VS Code.
 1. Make the script executable and run it:
 
-<comment>
-By default, Git tracks user-level execute permissions of a file. So as long as you have marked the file as
-user-executable before pushing it to the remove copy of the repo, Git should recreate the setup.sh file on
-the machine of another user who clones the repo with permissions that allow the user to execute it. That appears
-to be the case now. I see `-rwxr-xr-x` for the file's permissions on my Windows machine (file permissions emulated
-in Git Bash, as Windows does not have per-file permissions), and I have not modified it. So I think this step is
-going to be unnecessary in most cases.
-
-I also think the scripts/make-sh-exectable.sh script is unnecessary is most cases for the same reason.
-</comment>
-
 ```shell
-chmod +x setup.sh
-<comment>
-This command executed with a code of 1 after writing this to stdout: "Error: 'formatter' directory not found."
-I don't see a formatter directory at the root of the source repo.
-</comment>
 ./setup.sh
 ```
 
@@ -236,36 +216,16 @@ This repository contains the slides the instructor uses to present the course.
 
 1. Open a _new_ terminal in VS Code (use Git Bash if you're on Windows).
 
-<comment>
-After running this command, I encountered this [dialog](./windows_defender_firewall.PNG) in Windows.
-You might want to mention this dialog in the documentation and ensure the read that it's OK to click
-the Allow Access button.
-</comment>
 2. Run the following script:
 
 ```shell
 ./scripts/run-slides.sh
 ```
 
-<comment>
-Just some comments on the slides:
+After running this command, you may encounter a dialog in Windows. This dialog is a prompt from Windows Defender Firewall.
 
----
+Click the **Allow Access** button to avoid any issues with the application's connectivity.
 
-You may want to update the page title form "reveal.js" to something else.
-
----
-
-In several cases, I had to press the > button twice before additional text appeared.
-
-For example, when one of the slides shows the following text:
-
-```Looking ahead: tech writing and AI
-
-AI will likely augment technical writing roles rather than fully replace them. This role could expand to include: 
-```
-
-</comment>
 3. If the script runs successfully, a link to the slides will be displayed. Click the link or visit [http://localhost:8001](http://localhost:8001) to view the slides in your browser.
 
 **Tip:** Press `Escape` to view an overview of the slide sections, making navigation easier.
@@ -286,10 +246,7 @@ The Admin panel is a frontend CRUD (Create-Read-Update-Delete) application that 
 
 3. If the script runs successfully, a link to the Admin panel will be displayed. Click the link or visit [http://localhost:5173/](http://localhost:5173/) to view the admin panel in your browser.
 
-<comment>
-When finished viewing the admin panel, not the slides.
-</comment>
-When you're finished viewing the slides, stop the server by pressing `Ctrl + C` in the same terminal where you ran the script.
+When you're finished viewing the admin panel, stop the server by pressing `Ctrl + C` in the same terminal where you ran the script.
 
 ## Pulling Changes
 
@@ -321,7 +278,4 @@ To confirm that you’ve successfully set up everything, please post the followi
 - [x] Set up and configured Postman
 ```
 
-<comment>
-Typo at the end of this line.
-</comment>
-Once you’ve completed all items on the checklist, you’ll be ready for the next steps. Wait for further instructions from your instructo
+Once you’ve completed all items on the checklist, you’ll be ready for the next steps. Wait for further instructions from your instructor.
