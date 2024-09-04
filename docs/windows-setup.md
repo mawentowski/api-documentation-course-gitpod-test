@@ -1,21 +1,19 @@
 # Windows Setup Instructions
 
-This guide walks you through setting up Git Bash on Windows, configuring it as the default terminal, setting up SSH for GitHub, installing `curl`, and setting up Node.js and npm.
+This guide walks you through setting a development environment on Windows.
 
 ## Table of Contents
 
 - [Windows Setup Instructions](#windows-setup-instructions)
   - [Table of Contents](#table-of-contents)
   - [1. **Install Git and Git Bash**](#1-install-git-and-git-bash)
-  - [2. **Confirm the Path to Git Bash Executable**](#2-confirm-the-path-to-git-bash-executable)
-  - [2. **Setting Git Bash as the Default Terminal in Windows Terminal**](#2-setting-git-bash-as-the-default-terminal-in-windows-terminal)
-  - [3. **Setting Git Bash as the Default Terminal for VS Code**](#3-setting-git-bash-as-the-default-terminal-for-vs-code)
-  - [5. Generate a SSH Key](#5-generate-a-ssh-key)
-  - [4. **Adding SSH Agent to Your `.bash_profile`**](#4-adding-ssh-agent-to-your-bash_profile)
-  - [4. **Copy the SSH Public Key to Clipboard:**](#4-copy-the-ssh-public-key-to-clipboard)
+  - [2. **Generate an SSH Key**](#2-generate-an-ssh-key)
+  - [3. **Adding SSH Agent to Your `.bash_profile`**](#3-adding-ssh-agent-to-your-bash_profile)
+  - [4. **Copy the SSH Public Key to Clipboard**](#4-copy-the-ssh-public-key-to-clipboard)
   - [5. **Add SSH Key to Your GitHub Account**](#5-add-ssh-key-to-your-github-account)
   - [6. **Install Node.js and npm**](#6-install-nodejs-and-npm)
   - [7. **Install `curl`**](#7-install-curl)
+  - [Next Steps](#next-steps)
 
 ## 1. **Install Git and Git Bash**
 
@@ -40,202 +38,95 @@ This guide walks you through setting up Git Bash on Windows, configuring it as t
 
 5. **Confirm Git and GitBash Installation:**
 
-   - Search for Git Bash from the start menu to confirm it is properly downloaded
-   - Open Git Bash and run:
+   - Open Visual Studio Code.
 
-   ```bash
-   git --version
-   ```
+   - From the top toolbar, open a new terminal window in VS Code by clicking **Terminal** > **New Terminal**.
 
-   - If Git is installed, this command will output the version number. If not, you'll see an error message indicating Git is not installed.
-   - Exit the Git Bash terminal
+   - To confirm Git installation, run:
 
-## 2. **Confirm the Path to Git Bash Executable**
-
-1. **Find the Git Bash Executable Path:**
-<comment>
-
-- In Windows 10 22H2, I did not have Windows Terminal installed. I had too acquire it via the Windows Store.
-- When I opened Windows Terminal, it defaulted to opening a tabbed terminal of PowerShell, not Command Line. Only the latter
-shell implementation has a `where` command.
-</comment>
-   - Open "Windows Terminal" (search for it from the Start menu) and run the following command to locate the path to the `bash` executable:
-
-     ```bash
-     where bash
+     ```shell
+     git --version
      ```
 
-1. **Copy the Path:**
+   If the command returns a Git version, the installation was successful. If not, there may have been an issue during installation. For help, visit the **SUPPORT - WINDOWS** > [# git-gitbash](https://discord.com/channels/1278288408795549716/1278295713742061579) channel.
 
-   - The output will typically show a path similar to:
+   - To confirm that you are using Git Bash, run:
 
-     ```plaintext
-     C:\Program Files\Git\bin\bash.exe
+     ```shell
+     echo $SHELL
      ```
 
-   - Copy this path, as you'll need it for the next step in configuring your terminal settings.
+   - The output should show a path similar to `/usr/bin/bash` if Git Bash is set up correctly. If not, there may have been an issue configuring Git Bash as the default terminal in VS Code. For help, visit the **SUPPORT - WINDOWS** > [# git-gitbash](https://discord.com/channels/1278288408795549716/1278295713742061579) channel.
 
-## 2. **Setting Git Bash as the Default Terminal in Windows Terminal**
+## 2. **Generate an SSH Key**
 
-<comment>
-Is it necessary for your users to use Windows Terminal and change its settings? Perhaps it would be better for
-your non-technical users to focus on using only integrated terminals within VS Code? That way they'd have to
-do less software configuration work and would have no need to appreciate the difference between those terminal
-implementations. Plus that's one less application they'd have to use.
-<comment>
-1. **Open Windows Terminal:**
+- With a Git Bash terminal open in Visual Studio Code, run the following command, replacing "your_email@example.com" with your GitHub email address:
 
-- Open "Windows Terminal" (if it's not already open) in the Start menu and open it.
+  ```shell
+  ssh-keygen -t rsa -b 4096 -C "your_email@example.com" -f ~/.ssh/id_GitHub_rsa
+  ```
 
-2. **Open Windows Terminal Settings:**
+- Press `Enter` to accept the default file location.
 
-   - Click on the dropdown arrow next to the tabs or press `Ctrl + ,` to open the settings.
+- When prompted for a passphrase, press `Enter` again to skip adding a passphrase.
 
-3. **Add a New Profile for Git Bash:**
+## 3. **Adding SSH Agent to Your `.bash_profile`**
 
-   - In the Settings tab, click on "Profiles" in the left sidebar, then click "Add a new profile" or use the "Add new" button.
-   - Choose "Command Line" from the options, which allows you to specify the path to the executable.
+1.  **Open .bash_profile**
 
-4. **Configure the Git Bash Profile:**
+- Ensure a Git Bash terminal is open in VS Code. If it's not, click **Terminal** > **New Terminal**.
 
-   - Set the "Name" to something recognizable like "Git Bash".
-   - In the "Command line" field, enter the path to the `bash.exe` executable retrieved earlier.
-
-5. **Set Git Bash as Default Profile:**
-
-   - Go back to the "Startup" section on the left sidebar.
-   - Set "Default profile" to the Git Bash profile you just created.
-
-6. **Save Changes:**
-   - Click "Save" or close the settings tab.
-
-**Verify Git Bash as Default Terminal:**
-
-- Open Windows Terminal. It should start with Git Bash as the default profile.
-
-<comment>
-I would express this preference in workspace VS Code settings rather than ask the user to modify his own
-user-settings in VS Code. Developers won't want to modify their user-level settings. Lay persons won't care
-either way, but it just gives them more setup steps that are unnecessary with good workspace-level VS Code
-settings saved in the source repository.
-<comment>
-## 3. **Setting Git Bash as the Default Terminal for VS Code**
-
-Prerequisites: You have copied the path to the `bash` executable to your clipboard (this was explained in a previous step).
-
-1. **Open Settings in VS Code:**
-
-   - Open VS Code and press `Ctrl + ,` to open the settings or go to `File > Preferences > Settings`.
-
-2. **Search for Terminal Settings:**
-
-   - Type "terminal" into the search bar to filter the relevant settings.
-
-3. **Set Git Bash as Default Terminal:**
-
-   - Locate "Terminal > Integrated > Shell: Windows".
-   - Click "Edit in settings.json" to open the JSON configuration file.
-
-4. **Add Git Bash Path:**
-
-   - Add or update the configuration to set Git Bash as the default terminal. Insert the following JSON snippet, replacing the placeholder path with the actual path to the bash.exe executable that you copied earlier:
-
-     ```json
-     "terminal.integrated.shell.windows": "C:\\Program Files\\Git\\bin\\bash.exe"
-     ```
-
-5. **Save and Close:**
-
-   - Save the `settings.json` file and close it.
-
-6. **Verify Configuration:**
-
-- Open a new terminal window in VS Code by clicking **Terminal** (from the top menu items) and select **New Terminal**.
 - To confirm that you are using Git Bash, run:
 
-  ```bash
+  ```shell
   echo $SHELL
   ```
 
-- The output should show a path similar to `/usr/bin/bash` if Git Bash is set up correctly. If you receive an error, it's likely there was an issue configuring Git Bash on Windows / VS Code.
+- The output should show a path similar to `/usr/bin/bash` if Git Bash is set up correctly. If not, there may have been an issue configuring Git Bash as the default terminal in VS Code. For help, visit the **SUPPORT - WINDOWS** > [# git-gitbash](https://discord.com/channels/1278288408795549716/1278295713742061579) channel.
 
-## 5. Generate a SSH Key
+- Run the following command to open the `.bash_profile` file in the `nano` editor:
 
-Run the following command, replacing `your_email@example.com` with your GitHub email address:
+  ```shell
+  nano ~/.bash_profile
+  ```
 
-```bash
-ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
-```
+2. **Add SSH Agent Lines**
 
-Press `Enter` to accept the default file location. You can set a passphrase for added security if desired.
+- Add the following lines to the bottom of your `.bash_profile` file:
 
-## 4. **Adding SSH Agent to Your `.bash_profile`**
+  ```shell
+  eval "$(ssh-agent -s)"
+  ssh-add ~/.ssh/id_GitHub_rsa
+  ```
 
-1. **Open Your `.bash_profile`:**
+- To exit `nano`, press `Ctrl + O` to save and `Ctrl + X` to exit.
 
-   - Open Git Bash and use:
+  If you're strugging to add the speicfied lines to your `.bash_profile`, post a questions to **SUPPORT - Software** > [# ssh](https://discord.com/channels/1278288408795549716/1278296342342664202) for help.
 
-     ```bash
-     nano ~/.bash_profile
-     ```
+1. **Verify the SSH Agent:**
 
-2. **Add SSH Agent Lines:**
+- Open a Git Bash terminal (if one is not already open) and check if the SSH agent is running by executing:
 
-   - Add the following lines to the bottom of your `.bash_profile` file:
+  ```shell
+  ssh-add -l
+  ```
 
-     ```bash
-     # Start the SSH agent
-     eval "$(ssh-agent -s)"
-     # Add your SSH private key to the agent
-     ssh-add ~/.ssh/id_rsa
-     ```
+- This command should list your added SSH keys if everything is set up correctly.
 
-   - To exit `nano`, press `Ctrl + O` to save and `Ctrl + X` to exit.
+  If a list is not returned, there is likely was an issue configuring the SSH agent. You can post a question to **SUPPORT - Software** > [# ssh](https://discord.com/channels/1278288408795549716/1278296342342664202) channel for help.
 
-<comment>
-This step is not needed if the user opens a new Bash process in terminal as part of Step 4,
-assuming they have not modified the default contents of `~/.bash_profile`, which look like this
-in Windows:
-```shell
-# generated by Git for Windows
-test -f ~/.profile && . ~/.profile
-test -f ~/.bashrc && . ~/.bashrc
-```
-I think you should get rid of this step and modify Step 4 to require the user to open a fresh terminal.
-</comment>
-1. **Source the `.bash_profile`:**
+## 4. **Copy the SSH Public Key to Clipboard**
 
-- Apply the changes by running:
+- Ensure a Git Bash terminal is open in Visual Studio Code.
+- To display the contents of your public SSH key, run the following command:
 
-     ```bash
-     source ~/.bash_profile
-     ```
+  ```shell
+  cat ~/.ssh/id_GitHub_rsa.pub
+  ```
 
-2. **Verify the SSH Agent:**
+- If the terminal outputs a long string beginning with `ssh-rsa`, the command was successful.
 
-   - Open a Git Bash terminal (if one is not already open) and check if the SSH agent is running by executing:
-
-     ```bash
-     ssh-add -l
-     ```
-
-   - This command should list your added SSH keys if everything is set up correctly.
-
-<comment>
-It's very important that the newline whitepsace character after "-----END OPENSSH PRIVATE KEY-----" also be copied.
-I would add language to this step to stress that.
-</comment>
-## 4. **Copy the SSH Public Key to Clipboard:**
-
-To display the contents of your public SSH key, run the following command:
-
-```shell
-cat ~/.ssh/id_rsa.pub
-```
-
-If the terminal outputs a long string beginning with `ssh-rsa`, the command was successful.
-
-Copy this long string, as you'll need it for the next step.
+- Copy this long string, as you'll need it for the next step.
 
 ## 5. **Add SSH Key to Your GitHub Account**
 
@@ -248,8 +139,11 @@ Copy this long string, as you'll need it for the next step.
    - Go to **Settings** > **SSH and GPG keys** > **New SSH key**.
 
 3. **Add Your SSH Key:**
-   - Paste your public SSH key (the contents of `id_rsa.pub`) into the key field and give it a descriptive title.
+
+   - Paste your public SSH key (the contents of `id_GitHub_rsa.pub`) into the key field and give it a descriptive title.
    - Click **Add SSH key** to save it.
+
+   If you are having trouble adding your SSH key to GitHub, you can post to the **SUPPORT - Software** > [# github](https://discord.com/channels/1278288408795549716/1278293898204286987) channel for help.
 
 ## 6. **Install Node.js and npm**
 
@@ -263,31 +157,33 @@ Copy this long string, as you'll need it for the next step.
 
 3. **Follow the Installation Wizard:**
 
+   Note: You may see a "Tools for Native Modules" message.
+
    - Click "Next" to proceed with the default options.
    - Choose the default installation location or select a different one if needed.
    - Ensure that the option to install npm (Node Package Manager) is selected.
-   - <comment>
-    I encountered this [prompt](./Capture.PNG) as well at this point in the instructions, so you may want to mention it.
-    I don't think any of your users will require Chocolatety.
-    </comment>
+   - Foor the "Tools for Native Modules" screen, simply click Next without ticking the checkbox.
    - Click “Install” and then “Finish” once the installation is complete.
 
 4. **Verify Installation:**
 
-   - Open a new terminal in VS Code by selecting `Terminal` > `New Terminal` from the menu or using the shortcut `` Ctrl + ` `` (backtick).
+   - Open a new terminal in VS Code by selecting `Terminal` > `New Terminal` from the menu.
+
    - Check Node.js version:
 
-     ```bash
+     ```shell
      node --version
      ```
 
    - Check npm version:
 
-     ```bash
+     ```shell
      npm --version
      ```
 
    - Both commands should output their respective versions, confirming that Node.js and npm are properly installed.
+
+     If those commands did not work, there is liklely an issue with your NPM installation. You can post to the **SUPPORT - WINDOWS** > [# npm-node](https://discord.com/channels/1278288408795549716/1278296962340487209) channel for help.
 
 ## 7. **Install `curl`**
 
@@ -297,31 +193,29 @@ Copy this long string, as you'll need it for the next step.
 
 2. **Extract and Install `curl`:**
 
-   - Extract the downloaded ZIP file to a location of your choice.
+   Download curl: Go to the curl website and download the appropriate curl package for Windows
 
-- <comment>
+   Extract and Install curl: Extract the downloaded ZIP file to a location of your choice.
 
-Might be good to stress here that the desired path is not the complete path to the executable `C:\path\to\curl\bin\curl.exe`,
-but rather the path to its parent directory `C:\path\to\curl\bin`.
-</comment>
+   - Add the path of the extracted `curl` executable (e.g., `C:\path\to\curl\bin`) to your system's `PATH` environment variable.
+   - Open the Start menu, search for "Environment Variables," and select "Edit the system environment variables."
+   - Click the "Environment Variables" button.
+   - In the "System variables" section, find the `Path` variable and click "Edit."
+   - Click "New" and add the path to the `curl` executable.
+   - Click "OK" to close all dialogs.
 
-```bash
-   - Add the path of the extracted `curl` executable (e.g., `C:\path\to\curl\bin`) to your system's `PATH` environment variable:
+3. **Test `curl` Installation:**
 
-     - Open the Start menu, search for "Environment Variables," and select "Edit the system environment variables."
-     - Click the "Environment Variables" button.
-     - In the "System variables" section, find the `Path` variable and
+   - In VS Code, open a new Git Bash terminal. and run a simple `curl` command to verify it’s working:
 
-   - Click "Edit."
-     - Click "New" and add the path to the `curl` executable.
-     - Click "OK" to close all dialogs.
+     ```shell
+     curl https://jsonplaceholder.typicode.com/posts/1
+     ```
 
-**Test `curl` Installation:**
+   - This command should return data from a free API endpoint, confirming that `curl` is installed and functioning correctly.
 
-- Open Git Bash and run a simple `curl` command to verify it’s working:
+     If the command did not return data, there is liklely an issue with your curl installation. You can post to the **SUPPORT - WINDOWS** > [# curl](https://discord.com/channels/1278288408795549716/1278295767861297195) channel for help.
 
-  ```bash
-  curl https://jsonplaceholder.typicode.com/posts/1
-  ```
+## Next Steps
 
-- This command should return data from a free API endpoint, confirming that `curl` is installed and functioning correctly.
+Aftering completing the steps in this document, go to the [README - Cloning the Repository](https://github.com/mawentowski/api-documentation-course?tab=readme-ov-file#cloning-the-repository) section.

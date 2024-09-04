@@ -106,16 +106,10 @@ For example:
 
 Remember to follow the issue template in the [Getting Help](#getting-help) section of this README.
 
-<command>
-I've registed these a "recommend extensions" in ./vscode/extensions.json. So all your users need to do is
-select the "Extensions: Show Recommended Extensions" option in the VS Code palette (Ctrl + Shift + P on Windows),
-which opens the EXTENSIONS pane with a search term of "@recommended". They'll just need to click the Install button
-beneath each of the search results.
-</command>
 ## Configuring Visual Studio Code
 
 1. Open Visual Studio Code.
-1. Click the **Extensions** tab and search for the following extensions (left-most toolbar), then install them:
+2. Click the **Extensions** tab (refer to the left sidebar / broken cube icon) and search for the following extensions, then install them:
 
 - Prettier (code formatter)
 - ESLint (linter for JavaScript)
@@ -123,13 +117,13 @@ beneath each of the search results.
 
 ## Cloning the Repository
 
-**Prerequisite:** Ensure you've set up SSH per the instructions in the [Windows](./docs/windows-setup.md) or [Mac](./docs/mac-setup.md) setup documentation.
+**Prerequisite:** Ensure you've set up SSH per the instructions in the [Windows](./docs/windows-setup.md) or [Mac](./docs/mac-setup.md) setup documentation. If you've already completed those steps, you can continue. Otherwise, please follow the setup instructions in the respective guide before moving forward.
 
 From this GitHub repository:
 
 1. Select the SSH option and copy the repository URL.
 2. Open Visual Studio Code (if not already open).
-3. Open a terminal (for Windows, ensure it's a Git Bash terminal). Do this by clicking **Terminal** at the top and selecting **New Terminal**.
+3. Open a terminal. Do this by clicking **Terminal** at the top and selecting **New Terminal**.
 4. Clone the repository by typing the following command, replacing the URL with the one you copied:
 
 ```shell
