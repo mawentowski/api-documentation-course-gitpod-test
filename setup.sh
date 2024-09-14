@@ -1,18 +1,17 @@
 #!/bin/bash
 
-# Make sure the make-sh-executable.sh script is executable
-# chmod +x ./scripts/make-sh-executable.sh
-
 # Call the make-sh-executable.sh script to make .sh files executable
-# ./scripts/make-sh-executable.sh
+
+chmod +x ./scripts/make-sh-executable.sh
+./scripts/make-sh-executable.sh
 
 # Check if the make-sh-executable.sh script executed successfully
-# if [ $? -eq 0 ]; then
-#   echo "Scripts are now executable."
-# else
-#   echo "Failed to make scripts executable."
-#   exit 1
-# fi
+if [ $? -eq 0 ]; then
+  echo "Scripts are now executable."
+else
+  echo "Failed to make scripts executable."
+  exit 1
+fi
 
 # Pull latest changes from the remote repository.
 
@@ -26,6 +25,8 @@ else
   exit 1
 fi
 
+
+
 # Install packages inside code base folders.
 ./scripts/install-dependencies.sh
 
@@ -34,6 +35,15 @@ if [ $? -eq 0 ]; then
   echo "Dependencies installed successfully."
 else
   echo "Failed to install dependencies."
+  exit 1
+fi
+
+./scripts/wipe-openapi-descriptions.sh
+
+if [ $? -eq 0 ]; then
+  echo "openapi.yml file successfully generated."
+else
+  echo "Failed to generate openapi.yml."
   exit 1
 fi
 
