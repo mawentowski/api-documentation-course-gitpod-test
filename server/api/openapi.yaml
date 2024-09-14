@@ -3,14 +3,16 @@ info:
   title: Point of Service (POS) API
   description: REST API to be used to create tableside food ordering applications.
   contact:
-    email: mawentowski@gmail.com
+    name: Course Discord server
+    url: https://discord.gg/dPsnz5u9
+    email: mark.wentowski@docsgeek.io
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: "1.0"
 servers:
 - url: http://localhost:8080/
-  description: API server
+  description: Local development
 tags:
 - name: Orders
   description: "Operations related to managing orders, including creation, modification,\
@@ -1682,6 +1684,7 @@ components:
       description: "Any special instructions or additional requests associated with\
         \ the order, such as customization details or specific preferences from the\
         \ customer."
+      nullable: true
     Auth:
       type: object
       properties:
@@ -1998,10 +2001,6 @@ components:
           $ref: '#/components/schemas/CreatedAt'
         updated_at:
           $ref: '#/components/schemas/UpdatedAt'
-        name:
-          type: string
-          description: The full legal name of the user.
-          example: Todd Marshburn
         user_name:
           $ref: '#/components/schemas/UserName'
         email:
@@ -2015,7 +2014,6 @@ components:
         role: manager
         updated_at: 2024-04-22T10:00:00Z
         user_name: john_doe
-        name: Todd Marshburn
         created_at: 2024-04-22T10:00:00Z
         id: 674d0bf5c28b69001f8e03a1
         email: johndoe@gmail.com
@@ -2257,7 +2255,6 @@ components:
           role: manager
           updated_at: 2024-04-22T10:00:00Z
           user_name: john_doe
-          name: Todd Marshburn
           created_at: 2024-04-22T10:00:00Z
           id: 674d0bf5c28b69001f8e03a1
           email: johndoe@gmail.com
@@ -2265,7 +2262,6 @@ components:
           role: manager
           updated_at: 2024-04-22T10:00:00Z
           user_name: john_doe
-          name: Todd Marshburn
           created_at: 2024-04-22T10:00:00Z
           id: 674d0bf5c28b69001f8e03a1
           email: johndoe@gmail.com
@@ -2399,7 +2395,6 @@ components:
             required:
             - dish_ids
             - name
-            - table_number
             type: object
             properties:
               name:
@@ -2482,18 +2477,14 @@ components:
             - user_name
             type: object
             properties:
-              name:
-                type: string
-                description: The full legal name of the user.
-                example: Todd Marshburn
-              user_name:
-                $ref: '#/components/schemas/UserName'
               email:
                 $ref: '#/components/schemas/Email'
               password:
                 $ref: '#/components/schemas/Password'
               role:
                 $ref: '#/components/schemas/Role'
+              user_name:
+                $ref: '#/components/schemas/UserName'
       required: true
     UpdateUserRequest:
       description: |
@@ -2503,18 +2494,14 @@ components:
           schema:
             type: object
             properties:
-              name:
-                type: string
-                description: The full legal name of the user.
-                example: Todd Marshburn
-              user_name:
-                $ref: '#/components/schemas/UserName'
               email:
                 $ref: '#/components/schemas/Email'
               password:
                 $ref: '#/components/schemas/Password'
               role:
                 $ref: '#/components/schemas/Role'
+              user_name:
+                $ref: '#/components/schemas/UserName'
       required: true
   securitySchemes:
     AccessToken:

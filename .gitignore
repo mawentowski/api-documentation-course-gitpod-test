@@ -16,3 +16,4 @@ personal
 input.json
 input.yaml
 .vite
+openapi.yml

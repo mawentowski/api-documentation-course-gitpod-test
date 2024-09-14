@@ -149,20 +149,21 @@ Take a moment to review the high-level folders/files of project and their purpos
 
 ```sh
 api-documentation-course/
-┣ .vscode/              # Contains VS Code configurations and settings
-┣ admin/                # React-based admin portal (frontend UI for the API)
-┣ design/               # Source OpenAPI spec and other design artifacts
-┣ docs/                 # Documentation specific to setting up the repository
-┣ formatter/            # Tool for converting JSON to YAML and vice versa
-┣ personal/             # Personal directory for storing untracked files
-┣ postman/              # Postman collection and environment files for API testing
-┣ scripts/              # Scripts used for setup automation
-┣ server/               # API implementation (backend server)
-┣ slides/               # Course slides, web-based presentations
-┣ .gitignore            # Specifies files and directories to ignore in Git
-┣ README.md             # Main setup instructions and links to specialized docs
-┣ docker-compose.yml    # Defines Docker services and orchestrates their setup
-┣ start.sh              # Script to automate repository setup and manage Docker containers
+┣ .vscode/                    # Contains VS Code configurations and settings
+┣ admin/                      # React-based admin portal (frontend UI for the API)
+┣ docs/                       # Documentation specific to setting up the repository
+┣ openapi/                    # Source OpenAPI specifications and design artifacts
+┣ postman/                    # Postman collection and environment files for API testing
+┣ scripts/                    # Scripts used for setup automation and other tasks
+┣ server/                     # API implementation (backend server)
+┣ .gitignore                  # Specifies files and directories to ignore in Git
+┣ .prettierrc                 # Configuration file for Prettier code formatting
+┣ README.md                   # Main setup instructions and links to specialized docs
+┣ docker-compose.admin.yml    # Docker Compose file for repository owner
+┣ docker-compose.yml          # Docker Compose file for the main project setup
+┣ package-lock.json           # Automatically generated file containing the exact version of dependencies
+┣ package.json                # Lists project dependencies, scripts, and metadata
+┗ setup.sh                    # Script to automate repository setup and initial configuration
 ```
 
 You might not fully understand every folder or file right now, but it's helpful to develop a basic familiarity for when instructions direct you to use specific tools in this repository.

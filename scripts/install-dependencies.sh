@@ -1,23 +1,17 @@
 #!/bin/bash
 
-# Function to install Node.js and npm
-install_node_npm() {
-  echo "Node.js and npm not found. Installing Node.js..."
-
-  # Install Node.js and npm
-  if command -v brew >/dev/null 2>&1; then
-    # Install Node.js using Homebrew
-    brew install node
+# Function to check for Node.js and npm
+check_node_npm() {
+  if command -v npm >/dev/null 2>&1; then
+    echo "npm is already installed."
   else
-    echo "Homebrew not found. Please install Homebrew first."
+    echo "npm is not installed. Please install Node.js and npm."
     exit 1
   fi
 }
 
 # Check if npm is installed
-if ! command -v npm >/dev/null 2>&1; then
-  install_node_npm
-fi
+check_node_npm
 
 # Function to install dependencies
 install_dependencies() {
@@ -49,4 +43,4 @@ install_dependencies() {
 # Install dependencies for code base directories
 install_dependencies "server"
 install_dependencies "admin"
-install_dependencies "slides"
+install_dependencies "openapi"

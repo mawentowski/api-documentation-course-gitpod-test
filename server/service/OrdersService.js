@@ -27,17 +27,17 @@ exports.postOrder = async function (body, token) {
       );
     }
 
-    const existingOrder = await OrderModel.findOne({
-      $and: [{ name: body.name }, { table_number: body.table_number }],
-    });
+    // const existingOrder = await OrderModel.findOne({
+    //   $and: [{ name: body.name }, { table_number: body.table_number }],
+    // });
 
-    if (existingOrder) {
-      throw new problem.Problem(
-        problem.E_CONFLICT,
-        'The provided name is associated with an existing order for this table.',
-        409
-      );
-    }
+    // if (existingOrder) {
+    //   throw new problem.Problem(
+    //     problem.E_CONFLICT,
+    //     'The provided name is associated with an existing order for this table.',
+    //     409
+    //   );
+    // }
 
     if (body.dish_ids) {
       const dishIds = body.dish_ids;
@@ -74,6 +74,12 @@ exports.postOrder = async function (body, token) {
     if (!body.hasOwnProperty('scheduled_at')) {
       body.scheduled_at = null;
     }
+    if (!body.hasOwnProperty('table_number')) {
+      body.table_number = null;
+    }
+    if (!body.hasOwnProperty('special_requests')) {
+      body.special_requests = null;
+    }
     const order = new OrderModel(body);
     order.status = 'received';
     order.priority = 3;
@@ -90,8 +96,8 @@ exports.postOrder = async function (body, token) {
         throw error;
       case 404:
         throw error;
-      case 409:
-        throw error;
+      // case 409:
+      //   throw error;
       default:
         throw new problem.Problem(
           problem.E_SERVER_FAULT,
@@ -109,7 +115,6 @@ exports.getOrderList = async function (
   offset
 ) {
   try {
-    // DOESNT WORK:
     // if ((sort && !priority) || (priority && !sort)) {
     //   throw new problem.Problem(
     //     problem.E_BAD_REQUEST,

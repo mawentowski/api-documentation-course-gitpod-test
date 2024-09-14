@@ -18,7 +18,7 @@ import { UserList, UserEdit, UserShow, UserCreate } from "./users";
 // import { PostList, PostEdit, PostCreate } from "./posts";
 // import PostIcon from "@mui/icons-material/Book";
 // import UserIcon from "@mui/icons-material/Group";
-// import { Dashboard } from "./Dashboard";
+import { Dashboard } from "./Dashboard";
 import { authProvider } from "./authProvider";
 
 export const App = () => (
@@ -26,7 +26,7 @@ export const App = () => (
     authProvider={authProvider}
     layout={Layout}
     dataProvider={dataProvider}
-    // dashboard={Dashboard}
+    dashboard={Dashboard}
   >
     <Resource
       name="orders"

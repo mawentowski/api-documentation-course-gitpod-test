@@ -7,7 +7,7 @@ const IngredientModel = mongoose.model(
   'Ingredient',
   require('./models/Ingredient').Ingredient
 );
-const AuthModel = mongoose.model('Auth', require('./models/Auth').Auth);
+// const AuthModel = mongoose.model('Auth', require('./models/Auth').Auth);
 const UserModel = mongoose.model('User', require('./models/User').User);
 const DishModel = mongoose.model('Dish', require('./models/Dish').Dish);
 
@@ -374,13 +374,21 @@ const generateOrders = async () => {
         ? faker.date.future().toISOString()
         : null;
 
+      const tableNumber = faker.datatype.boolean()
+        ? faker.number.int({ min: 1, max: 30 })
+        : null;
+
+      const specialRequests = faker.datatype.boolean()
+        ? faker.lorem.sentence()
+        : null;
+
       return new OrderModel({
         name: faker.person.fullName(),
-        table_number: faker.number.int({ min: 1, max: 30 }),
+        table_number: tableNumber,
         status: randomOrderStatus,
         priority: faker.number.int({ min: 1, max: 5 }),
         dish_ids: randomDishes,
-        special_requests: faker.lorem.sentence(), // Generates a random sentence for special requests
+        special_requests: specialRequests, // Generates a random sentence for special requests
         scheduled_at: scheduledAt, // Can be null or a future date
         created_at: faker.date.past(),
         updated_at: faker.date.recent(),
@@ -466,59 +474,6 @@ const generateUsers = async () => {
   }
 };
 
-const deleteAll = async (model) => {
-  try {
-    await connectDB();
-    await model.deleteMany({});
-    console.log(`All documents deleted successfully from ${model.modelName}`);
-  } catch (error) {
-    console.error(`Error deleting documents from ${model.modelName}:`, error);
-  } finally {
-    await mongoose.disconnect();
-  }
-};
-
-// Example usage:
-const deleteAllDishes = async () => await deleteAll(DishModel);
-const deleteAllUsers = async () => await deleteAll(UserModel);
-
-// Call your functions
-// deleteAllDishes();
-// deleteAllUsers();
-// deleteAllCategories();
-// deleteAllOrders();
-// deleteAllIngredients();
-// deleteAllAuths();
-
-const getCollectionData = async (model) => {
-  try {
-    await connectDB();
-
-    const data = await model.find();
-    console.log(`${model.modelName}s:`, data);
-
-    return data;
-  } catch (error) {
-    console.error(
-      `Error fetching ${model.modelName}s from the database:`,
-      error
-    );
-  }
-};
-
-const getOrders = async () => await getCollectionData(OrderModel);
-const getUsers = async () => await getCollectionData(UserModel);
-const getIngredients = async () => await getCollectionData(IngredientModel);
-const getDishes = async () => await getCollectionData(DishModel);
-const getAuths = async () => await getCollectionData(AuthModel); // need to add if no models found condition overall
-
-// getOrders();
-// getUsers();
-// getIngredients();
-// getDishes();
-// getAuths();
-
-// Main function to run the seed and get IDs
 const main = async () => {
   try {
     await connectDB();
@@ -527,14 +482,6 @@ const main = async () => {
     await generateDishes();
     await generateOrders();
     await generateUsers();
-    //
-    // await getIngredientIds();
-    // await deleteAllDishes();
-    // await getDishIds();
-    // await getCategories();
-    // await deleteAllUsers();
-    // await getUsers();
-    // await generateAuths();
   } catch (error) {
     console.error('Error during operations:', error);
   } finally {
@@ -545,5 +492,3 @@ const main = async () => {
 
 // Run the main function
 main();
-
-// FIX THE PRICE THING!!
