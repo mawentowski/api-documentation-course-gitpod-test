@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change directory to ./openapi
-cd ../openapi || { echo "Directory ./openapi not found!"; exit 1; }
+cd ./openapi || { echo "Directory ./openapi not found!"; exit 1; }
 
 # Make a copy of openapi.original.yml and name it openapi.yml
 cp openapi.original.yml openapi.yml || { echo "Failed to copy openapi.original.yml"; exit 1; }
