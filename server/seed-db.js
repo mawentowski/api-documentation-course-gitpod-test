@@ -383,7 +383,7 @@ const generateOrders = async () => {
         : null;
 
       return new OrderModel({
-        name: faker.person.fullName(),
+        name: faker.person.firstName(),
         table_number: tableNumber,
         status: randomOrderStatus,
         priority: faker.number.int({ min: 1, max: 5 }),
