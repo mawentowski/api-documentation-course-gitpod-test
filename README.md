@@ -22,9 +22,9 @@ As we progress through the course, you'll interact with various parts of this re
   - [Cloning the Repository](#cloning-the-repository)
   - [Project Directory Structure](#project-directory-structure)
   - [Creating Your Personal Directory](#creating-your-personal-directory)
+  - [Creating a Copy of `openapi.original.yml`](#creating-a-copy-of-openapioriginalyml)
   - [Running the Setup Script](#running-the-setup-script)
   - [Verifying Docker Containers](#verifying-docker-containers)
-  - [Running Course Slides](#running-course-slides)
   - [Running Admin Panel](#running-admin-panel)
   - [Pulling Changes](#pulling-changes)
   - [Soliciting Reviews](#soliciting-reviews)
@@ -172,6 +172,10 @@ You might not fully understand every folder or file right now, but it's helpful 
 
 You shouldn't edit the files in this project, except for those in the `personal` directory. Create this directory off the root to store any files you'd like to keep untracked by Git.
 
+## Creating a Copy of `openapi.original.yml`
+
+In the `openapi` folder, make a copy of the `openapi.original.yml`, naming the copy `openapi.yml`. The exercises will tell you to edit `openapi.yml` when the time comes. Do not edit `openapi.original.yml` or other besides `openapi.yml` in the project.
+
 ## Running the Setup Script
 
 The `setup.sh` script automates the setup of this repository by handling tasks like installing project dependencies, starting Docker, and seeding the database so the API has data ready for use.
@@ -204,28 +208,6 @@ After running `setup.sh`, open Docker Desktop (if not already open) and navigate
 If either two of the approve conditions are not met, please post your issue (using the template) to the [# docker](https://discord.com/channels/1278288408795549716/1278304522522988649) Discord channel.
 
 If all containers are running and the ports are clickable, you're good to go!
-
-## Running Course Slides
-
-This repository contains the slides the instructor uses to present the course.
-
-1. Open a _new_ terminal in VS Code (use Git Bash if you're on Windows).
-
-2. Run the following script:
-
-```shell
-./scripts/run-slides.sh
-```
-
-After running this command, you may encounter a dialog in Windows. This dialog is a prompt from Windows Defender Firewall.
-
-Click the **Allow Access** button to avoid any issues with the application's connectivity.
-
-3. If the script runs successfully, a link to the slides will be displayed. Click the link or visit [http://localhost:8001](http://localhost:8001) to view the slides in your browser.
-
-**Tip:** Press `Escape` to view an overview of the slide sections, making navigation easier.
-
-When you're finished viewing the slides, stop the server by pressing `Ctrl + C` in the same terminal where you ran the script.
 
 ## Running Admin Panel
 
