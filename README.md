@@ -22,7 +22,6 @@ As we progress through the course, you'll interact with various parts of this re
   - [Cloning the Repository](#cloning-the-repository)
   - [Project Directory Structure](#project-directory-structure)
   - [Creating Your Personal Directory](#creating-your-personal-directory)
-  - [Creating a Copy of `openapi.original.yml`](#creating-a-copy-of-openapioriginalyml)
   - [Running the Setup Script](#running-the-setup-script)
   - [Verifying Docker Containers](#verifying-docker-containers)
   - [Running Admin Panel](#running-admin-panel)
@@ -171,10 +170,6 @@ You might not fully understand every folder or file right now, but it's helpful 
 ## Creating Your Personal Directory
 
 You shouldn't edit the files in this project, except for those in the `personal` directory. Create this directory off the root to store any files you'd like to keep untracked by Git.
-
-## Creating a Copy of `openapi.original.yml`
-
-In the `openapi` folder, make a copy of the `openapi.original.yml`, naming the copy `openapi.yml`. The exercises will tell you to edit `openapi.yml` when the time comes. Do not edit `openapi.original.yml` or other besides `openapi.yml` in the project.
 
 ## Running the Setup Script
 

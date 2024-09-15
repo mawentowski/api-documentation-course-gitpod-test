@@ -15,15 +15,15 @@ fi
 
 # Pull latest changes from the remote repository.
 
-./scripts/pull-changes.sh
+# ./scripts/pull-changes.sh
 
-Check if script executed successfully
-if [ $? -eq 0 ]; then
-  echo "The latest changes were pulled from the remote."
-else
-  echo "Failed to pull the latest changes from the remote."
-  exit 1
-fi
+# Check if script executed successfully
+# if [ $? -eq 0 ]; then
+#   echo "The latest changes were pulled from the remote."
+# else
+#   echo "Failed to pull the latest changes from the remote."
+#   exit 1
+# fi
 
 # Install packages inside code base folders.
 ./scripts/install-dependencies.sh
@@ -35,6 +35,16 @@ else
   echo "Failed to install dependencies."
   exit 1
 fi
+
+./scripts/wipe-openapi-descriptions.sh
+
+if [ $? -eq 0 ]; then
+  echo "openapi.yml file successfully generated."
+else
+  echo "Failed to generate openapi.yml."
+  exit 1
+fi
+
 
 ./scripts/start-docker.sh
 
