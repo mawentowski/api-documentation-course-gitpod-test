@@ -17,7 +17,6 @@ fi
 
 ./scripts/pull-changes.sh
 
-Check if script executed successfully
 if [ $? -eq 0 ]; then
   echo "The latest changes were pulled from the remote."
 else
