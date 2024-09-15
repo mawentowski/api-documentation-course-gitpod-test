@@ -75,7 +75,7 @@ exports.getIngredient = async function getIngredient(id, fields) {
     if (!ingredient) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        'Ingredient not found. If you are unsure of the ID, try searching for the ingredient by name.',
+        'Ingredient not found.',
         404
       );
     }
@@ -192,7 +192,7 @@ exports.putIngredient = async function (body, id, token) {
     if (!existingIngredient) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        'Ingredient not found. If you are unsure of the ID, try searching for the ingredient by name.',
+        'Ingredient not found.',
         404
       );
     }
@@ -282,7 +282,7 @@ exports.deleteIngredient = async function (id, token) {
     if (!ingredient) {
       throw new problem.Problem(
         problem.E_NOT_FOUND,
-        'Ingredient not found. If you are unsure of the ID, try searching for the ingredient by name.',
+        'Ingredient not found.',
         404
       );
     }

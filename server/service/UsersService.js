@@ -123,11 +123,7 @@ exports.getUser = async function getUser(id, fields) {
 
     const user = await UserModel.findById(id);
     if (!user) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'User not found. If you are unsure of the ID, try searching for the user by the table number and given name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'User not found.', 404);
     }
     const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
     let usersQuery = UserModel.findById(id, fieldsOptions);
@@ -188,11 +184,7 @@ exports.putUser = async function (body, id, token) {
     }
     const existingUser = await UserModel.findById(id);
     if (!existingUser) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'User not found. If you are unsure of the ID, try searching for the user using their email or user name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'User not found.', 404);
     }
 
     const existingUserWithSameEmailOrUserName = await UserModel.findOne({
@@ -273,11 +265,7 @@ exports.deleteUser = async function (id, token) {
     }
     const user = await UserModel.findById(id);
     if (!user) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'User not found. If you are unsure of the ID, try searching for the user using their email or user name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'User not found.', 404);
     }
     await UserModel.deleteOne({ _id: id });
   } catch (error) {

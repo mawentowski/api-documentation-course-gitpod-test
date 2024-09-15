@@ -186,11 +186,7 @@ exports.getDish = async function getDish(id, fields) {
     }
     const dish = await DishModel.findById(id);
     if (!dish) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'Dish not found.', 404);
     }
     const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
 
@@ -247,11 +243,7 @@ exports.getDishIngredients = async function (
     // Fetch the dish by ID
     const dish = await DishModel.findById(id);
     if (!dish) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'Dish not found.', 404);
     }
 
     // Ensure dish.ingredients is an array and not empty
@@ -345,11 +337,7 @@ exports.getDishIngredients = async function (
     // Fetch the dish by ID
     const dish = await DishModel.findById(id);
     if (!dish) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'Dish not found.', 404);
     }
 
     // Ensure dish.ingredients is an array and not empty
@@ -451,11 +439,7 @@ exports.putDish = async function (body, id, token) {
     }
     const existingDish = await DishModel.findById(id);
     if (!existingDish) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'Dish not found.', 404);
     }
 
     const conflictingDish = await DishModel.findOne({
@@ -570,11 +554,7 @@ exports.deleteDish = async function (id, token) {
     }
     const dish = await DishModel.findById(id);
     if (!dish) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'Dish not found. If you are unsure of the ID, try searching for the dish by name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'Dish not found.', 404);
     }
     await DishModel.deleteOne({ _id: id });
   } catch (error) {

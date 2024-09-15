@@ -184,11 +184,7 @@ exports.getOrder = async function getOrder(id, fields) {
     }
     const order = await OrderModel.findById(id);
     if (!order) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'Order not found. If you are unsure of the ID, try searching for the order by the table number and name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'Order not found.', 404);
     }
     const fieldsOptions = sortingUtils.parseFieldsOptions(fields);
     let ordersQuery = OrderModel.findById(id, fieldsOptions);
@@ -241,11 +237,7 @@ exports.getOrderDishes = async function (
     // Fetch the order by ID
     const orderData = await OrderModel.findById(id);
     if (!orderData) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'Order not found. If you are unsure of the ID, try searching for the order by table or name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'Order not found.', 404);
     }
     if (filter && filter.includes('q.eq~')) {
       filter = filter.replace('q.eq~', 'name.eq~');
@@ -321,11 +313,7 @@ exports.putOrder = async function putOrder(body, id, token) {
     // Retrieve the existing order from the database
     const existingOrder = await OrderModel.findById(id);
     if (!existingOrder) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'Order not found. If you are unsure of the ID, try searching for the order by table number and name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'Order not found.', 404);
     }
     // Validate required fields and generate error message
     let missingFields = [];
@@ -399,11 +387,7 @@ exports.deleteOrder = async function (id, token) {
     }
     const order = await OrderModel.findById(id);
     if (!order) {
-      throw new problem.Problem(
-        problem.E_NOT_FOUND,
-        'Order not found. If you are unsure of the ID, try searching for the order by table number and name.',
-        404
-      );
+      throw new problem.Problem(problem.E_NOT_FOUND, 'Order not found.', 404);
     }
     await OrderModel.deleteOne({ _id: id });
   } catch (error) {
