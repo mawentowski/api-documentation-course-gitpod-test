@@ -11,7 +11,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 servers:
-  - url: http://localhost:8080/
+  - url: http://localhost:80/
     description: Local development
 tags:
   - name: Orders
@@ -124,7 +124,7 @@ paths:
             Separate filters using the `|` delimter. Dates should be in `YYYY-MM-DD` format.
           schema:
             type: string
-            example: 'table_number.lt~5|status.eq~On the way'
+            example: 'table_number.lt~5|status.eq~On the Way'
         - name: limit
           in: query
           description: |
@@ -734,7 +734,7 @@ paths:
             Use this parameter to specify which resource properties should be included in the response. Provide a list of schema property names, separated by the `|` delimiter. This allows for precise control over the data returned.
           schema:
             type: string
-          example: 'name|in_stocky_qty'
+          example: 'name|in_stock_qty'
         - name: filter
           in: query
           description: |
@@ -752,7 +752,7 @@ paths:
             Separate filters using the `|` delimter. Dates should be in `YYYY-MM-DD` format.
           schema:
             type: string
-            example: 'created_at.gt:2024-05-07,in_stock_qty.eq~0'
+            example: 'created_at.gt~2024-05-07|in_stock_qty.gt~3'
         - name: limit
           in: query
           description: |
@@ -1538,20 +1538,22 @@ components:
           examples:
             Order - Unscheduled:
               value:
+                name: 'Ben'
+                table_number: 18
                 dish_ids:
                   - '692a4a34a46ecf001f35ac6f'
                   - '6a4a857c022eb7001f9b8972'
                   - '6b7c2441a0db43001f9bf377'
-                name: 'Ben'
-                table_number: 18
+                special_requests: 'No peanuts.'
+                scheduled at: null
             Order - Scheduled:
               value:
+                name: 'Ben'
+                table_number: 18
                 dish_ids:
                   - '692a4a34a46ecf001f35ac6f'
                   - '6a4a857c022eb7001f9b8972'
                   - '6b7c2441a0db43001f9bf377'
-                name: 'Ben'
-                table_number: 18
                 scheduled_at: '2024-08-26T09:03:18.865Z'
     UpdateOrderRequest:
       description: Request body containing properties to update the resource.
@@ -1869,7 +1871,7 @@ components:
         - **`Received`**: The patron has placed an order, displaying details in the expeditor's KDS. 
         - **`In Progress`**: The expeditor prioritizes the order, displaying relevant parts in the respective KDS stations for preparation.
         - **`Ready for assembly`**: Stations mark dishes as ready, and the expeditor assembles the order.
-          - **Table-side**: The expeditor changes the status to `On the way`, and a food runner delivers it.
+          - **Table-side**: The expeditor changes the status to `On the Way`, and a food runner delivers it.
           - **Takeaway**: The expeditor changes the status to `Ready for pickup`, and the patron collects it at the pickup station.
     TableNumber:
       type: integer

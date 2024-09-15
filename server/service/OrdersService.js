@@ -81,7 +81,7 @@ exports.postOrder = async function (body, token) {
       body.special_requests = null;
     }
     const order = new OrderModel(body);
-    order.status = 'received';
+    order.status = 'Received';
     order.priority = 3;
     order.created_at = new Date();
     order.updated_at = new Date();

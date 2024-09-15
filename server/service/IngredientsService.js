@@ -201,7 +201,9 @@ exports.putIngredient = async function (body, id, token) {
     let missingFields = [];
     if (!body.name) missingFields.push('name');
     if (!body.price) missingFields.push('price');
-    if (!body.in_stock_qty) missingFields.push('in_stock_qty');
+    // if (!body.in_stock_qty === undefined || body.in_stock_qty === null) {
+    //   missingFields.push('in_stock_qty');
+    // }
 
     if (missingFields.length > 0) {
       throw new problem.Problem(

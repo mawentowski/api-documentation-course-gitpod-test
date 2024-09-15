@@ -11,7 +11,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: "1.0"
 servers:
-- url: http://localhost:8080/
+- url: http://localhost:80/
   description: Local development
 tags:
 - name: Orders
@@ -90,7 +90,7 @@ paths:
         explode: true
         schema:
           type: string
-          example: table_number.lt~5|status.eq~On the way
+          example: table_number.lt~5|status.eq~On the Way
       - name: limit
         in: query
         description: |
@@ -861,7 +861,7 @@ paths:
         explode: true
         schema:
           type: string
-        example: name|in_stocky_qty
+        example: name|in_stock_qty
       - name: filter
         in: query
         description: |
@@ -882,7 +882,7 @@ paths:
         explode: true
         schema:
           type: string
-          example: "created_at.gt:2024-05-07,in_stock_qty.eq~0"
+          example: created_at.gt~2024-05-07|in_stock_qty.gt~3
       - name: limit
         in: query
         description: |
@@ -1964,7 +1964,7 @@ components:
         \ \n- **`In Progress`**: The expeditor prioritizes the order, displaying relevant\
         \ parts in the respective KDS stations for preparation.\n- **`Ready for assembly`**:\
         \ Stations mark dishes as ready, and the expeditor assembles the order.\n\
-        \  - **Table-side**: The expeditor changes the status to `On the way`, and\
+        \  - **Table-side**: The expeditor changes the status to `On the Way`, and\
         \ a food runner delivers it.\n  - **Takeaway**: The expeditor changes the\
         \ status to `Ready for pickup`, and the patron collects it at the pickup station.\n"
       nullable: true
@@ -2414,20 +2414,21 @@ components:
           examples:
             Order - Unscheduled:
               value:
+                name: Ben
+                table_number: 18
                 dish_ids:
                 - 692a4a34a46ecf001f35ac6f
                 - 6a4a857c022eb7001f9b8972
                 - 6b7c2441a0db43001f9bf377
-                name: Ben
-                table_number: 18
+                special_requests: No peanuts.
             Order - Scheduled:
               value:
+                name: Ben
+                table_number: 18
                 dish_ids:
                 - 692a4a34a46ecf001f35ac6f
                 - 6a4a857c022eb7001f9b8972
                 - 6b7c2441a0db43001f9bf377
-                name: Ben
-                table_number: 18
                 scheduled_at: 2024-08-26T09:03:18.865Z
       required: true
     UpdateOrderRequest:

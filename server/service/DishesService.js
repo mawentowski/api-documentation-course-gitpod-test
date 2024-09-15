@@ -37,7 +37,6 @@ exports.postDishes = async function (body, token) {
     if (existingDish) {
       throw new problem.Problem(
         problem.E_CONFLICT,
-        'The provided name corresponds to a resource instance in the database.',
         'Dish already exists. Update the existing dish or create a new dish.',
         409
       );
@@ -49,7 +48,6 @@ exports.postDishes = async function (body, token) {
         if (!Types.ObjectId.isValid(ingredient.ingredient_id)) {
           throw new problem.Problem(
             problem.E_BAD_REQUEST,
-            'The request was malformed or invalid.',
             'Invalid ingredient ID format. Ensure all ingredient IDs are valid Mongo database ObjectId strings.',
             400
           );
@@ -61,7 +59,6 @@ exports.postDishes = async function (body, token) {
         if (!foundIngredient) {
           throw new problem.Problem(
             problem.E_NOT_FOUND,
-            'A requested resource does not exist.',
             `Ingredient with ID ${ingredient.ingredient_id} not found.`,
             404
           );
@@ -86,7 +83,6 @@ exports.postDishes = async function (body, token) {
         .join(', ');
       throw new problem.Problem(
         problem.E_CLIENT_FAULT,
-        'The request was malformed or invalid.',
         `The following essential ingredients are out of stock: ${ingredientNames}`,
         400
       );
@@ -115,9 +111,6 @@ exports.postDishes = async function (body, token) {
     }
   }
 };
-
-// i need update. if (filter === 'q'), then it needs to search for all DishModels, look for matchcing on the `name` property. For example: http://localhost:8080/dishes?filter=q.eq~Barbacos. It will search for DishModels
-// that have Barbacos in the name.
 
 exports.getDishList = async function (
   sort,
