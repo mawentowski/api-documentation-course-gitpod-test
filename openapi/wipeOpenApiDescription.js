@@ -6,10 +6,15 @@ function recursiveReplace(obj) {
   if (typeof obj === 'object' && obj !== null) {
     for (let key in obj) {
       if (key === 'description') {
-        // Check for the specific exception
+        // Check if the description is an object with a $ref field
+        if (typeof obj[key] === 'object' && obj[key].$ref) {
+          continue; // Skip replacing if it's a $ref object
+        }
+
+        // Check if the description is a string with the specific $ref
         if (
           typeof obj[key] === 'string' &&
-          obj[key] === "$ref: '#/components/schemas/Description'"
+          obj[key].trim() === "$ref: '#/components/schemas/Description'"
         ) {
           continue; // Skip replacing this field
         } else {
@@ -26,33 +31,18 @@ function recursiveReplace(obj) {
 
 // Function to load and modify the YAML file
 function replaceDescriptionsAndSummaries(filePath) {
-  // Check if the file exists
-  if (fs.existsSync(filePath)) {
-    console.log('File already exists. Exiting script.');
-    return;
-  }
-
-  // If the file doesn't exist, copy contents from openapi.original.yml
   try {
-    const originalFilePath = 'openapi.original.yml';
-    if (!fs.existsSync(originalFilePath)) {
-      console.error('Original file not found. Exiting script.');
-      return;
-    }
-
-    // Read contents of the original file
-    const originalFileContents = fs.readFileSync(originalFilePath, 'utf8');
-    let data = yaml.load(originalFileContents);
+    // Read contents of the file
+    const fileContents = fs.readFileSync(filePath, 'utf8');
+    let data = yaml.load(fileContents);
 
     // Replace all descriptions and summaries
     recursiveReplace(data);
 
-    // Save the modified YAML to the new file
+    // Save the modified YAML to the file
     const newYaml = yaml.dump(data);
     fs.writeFileSync(filePath, newYaml, 'utf8');
-    console.log(
-      'File created and descriptions and summaries replaced successfully.'
-    );
+    console.log('Descriptions and summaries replaced successfully.');
   } catch (error) {
     console.error('Error processing the file:', error);
   }

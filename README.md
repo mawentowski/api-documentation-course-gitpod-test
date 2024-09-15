@@ -186,6 +186,8 @@ The `setup.sh` script automates the setup of this repository by handling tasks l
 ./setup.sh
 ```
 
+If you receive any popups asking for granting permissin for some program to make edits to your machine during the set up process, go ahead and grant permission and the script will continue running.
+
 If the script fails or you encounter any error messages in the terminal, please copy the entire output and post it in the appropriate **Discord** channel based on your operating system:
 
 - [# windows-setup](https://discord.com/channels/1278288408795549716/1278591699186090028)
