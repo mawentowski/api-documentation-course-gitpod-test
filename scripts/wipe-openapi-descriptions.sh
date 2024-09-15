@@ -9,7 +9,7 @@ cp openapi.original.yml openapi.yml || { echo "Failed to copy openapi.original.y
 # Run the Node.js script
 node wipeOpenApiDescription.js
 
-# Check if the Node.js script ran successfully
+# Check if the Node.js script ran successfully.
 if [ $? -ne 0 ]; then
   echo "Node script execution failed!"
   exit 1
