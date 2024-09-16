@@ -13,10 +13,9 @@ As we progress through the course, you'll interact with various parts of this re
 - [API Documentation Course](#api-documentation-course)
   - [About This Repository](#about-this-repository)
   - [Table of Contents](#table-of-contents)
-  - [Join the Discord Server](#join-the-discord-server)
-  - [Getting Help](#getting-help)
   - [System Privileges and Course Setup](#system-privileges-and-course-setup)
   - [Required Software for the Course](#required-software-for-the-course)
+  - [Join the Discord Server](#join-the-discord-server)
   - [Set up your Development Environment](#set-up-your-development-environment)
   - [Configuring Visual Studio Code](#configuring-visual-studio-code)
   - [Cloning the Repository](#cloning-the-repository)
@@ -29,43 +28,7 @@ As we progress through the course, you'll interact with various parts of this re
   - [Soliciting Reviews](#soliciting-reviews)
   - [Postman Setup](#postman-setup)
   - [Checklist](#checklist)
-
-## Join the Discord Server
-
-Join the course [Discord server](https://discord.gg/qT3enBuZ) for support and to ask questions as you set up your environment.
-
-You'll be prompted to create an account if you don't have one already.
-
-Head on over to the [# welcome](https://discord.com/channels/1278288408795549716/1278583957600079924) channel and introduce yourself!
-
-If you have trouble joining the Discord server, please email [mark.wentowski@docsgeek.io](mailto:mark.wentowski@docsgeek.io).
-
-## Getting Help
-
-For any questions or issues, visit the course Discord server. Different channels are available for various topics.
-
-Post your inquiry in the channel that best matches your issue. Note there are three key sections: one for software-related issues and two others dedicated to setting up a development environment on Windows or Mac, respectively.
-
-As you follow the README instructions, you'll be guided on which support topic to post in if you run into any issues.
-
-When posting an issue, please use the following template:
-
-```markdown
-**Issue Title:**
-Provide a concise title for your issue.
-
-**Operating System**:
-Specify your operating system (Windows/Mac/Linux). If you are posting to an OS-specific channel, then you can omit this information.
-
-**OS Version:**
-Indicate the specific release or version of your operating system.
-
-**Type of computer:**
-Is this a personal or work computer?
-
-**Description:**
-Give a detailed description of the issue. Include steps to replicate the problem, any error messages (you can copy from the terminal), and relevant screenshots if possible.
-```
+  - [Getting Help](#getting-help)
 
 ## System Privileges and Course Setup
 
@@ -85,7 +48,30 @@ Search for these software applications on Google and download them:
 - Google Chrome
 - Docker Desktop
 
+When prompted, create an account for each software.
+
 If you are having trouble installing software, post to the channel dedicated to the software. For example, for Visual Studio Code issues, post to the **Support - Software** > [# visual-studio-code](https://discord.com/channels/1278288408795549716/1278305356530843698) channel.
+
+## Join the Discord Server
+
+1. Open the Discord app and sign in if needed.
+2. Click the plus (+) icon on the left-side toolbar to add a server.
+3. Select "Join a Server" under "Have an invite already?".
+4. Paste the following URL into the "Invite Link" field:
+
+   ```
+   https://discord.gg/YucnPrkMMP
+   ```
+
+See the video below for reference:
+
+![join-the-server](docs/gifs/join-the-server.gif)
+
+You’ll be added to the course Discord channel where you can get support and ask questions as you set up your environment.
+
+Head to the [#welcome](https://discord.com/channels/1278288408795549716/1278583957600079924) channel and introduce yourself!
+
+If you encounter any issues, please email [mark.wentowski@docsgeek.io](mailto:mark.wentowski@docsgeek.io).
 
 ## Set up your Development Environment
 
@@ -253,3 +239,30 @@ To confirm that you’ve successfully set up everything, please post the followi
 ```
 
 Once you’ve completed all items on the checklist, you’ll be ready for the next steps. Wait for further instructions from your instructor.
+
+## Getting Help
+
+For any questions or issues, visit the course Discord server. Different channels are available for various topics.
+
+Post your inquiry in the channel that best matches your issue. Note there are three key sections: one for software-related issues and two others dedicated to setting up a development environment on Windows or Mac, respectively.
+
+As you follow the README instructions, you'll be guided on which support topic to post in if you run into any issues.
+
+When posting an issue, please use the following template:
+
+```markdown
+**Issue Title:**
+Provide a concise title for your issue.
+
+**Operating System**:
+Specify your operating system (Windows/Mac/Linux). If you are posting to an OS-specific channel, then you can omit this information.
+
+**OS Version:**
+Indicate the specific release or version of your operating system.
+
+**Type of computer:**
+Is this a personal or work computer?
+
+**Description:**
+Give a detailed description of the issue. Include steps to replicate the problem, any error messages (you can copy from the terminal), and relevant screenshots if possible.
+```
