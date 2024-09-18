@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant Admin as Admin
+    participant API as API
+
+    Admin->>API: POST /auth/token
+    API->>Admin: 201 Created (access_token, expires_at, refresh_token)
+
+    Admin->>API: POST /ingredients
+    API->>Admin: 201 Created (ingredient details)
+
+    Admin->>API: POST /dishes
+    API->>Admin: 201 Created (dish details)

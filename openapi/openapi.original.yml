@@ -2,7 +2,35 @@ openapi: 3.0.3
 info:
   title: Point of Service (POS) API
   version: '1.0'
-  description: 'REST API to be used to create tableside food ordering applications.'
+  description: |
+    A REST API to be used to create tableside and takeaway food ordering applications.
+
+    ## Auth
+
+    To create orders, you need to first create a user account then authenticate your user account for an access token.
+
+    To get an access token and authenticate your requests.
+
+    1. Create a User with **POST /users**.
+    2. Pass your username and password to **POST /auth/token**.
+    3. Add the access token to the authorization header of API calls to protected resources.
+
+    ## Orders
+
+    Orders are the heart of the API. Create an order with [POST /orders], passing order details in the JSON request body:
+
+    ```json
+    {
+      "name": "Benjamin",
+      "table_number": 18,
+      "dish_ids": [
+        66e6a90a5eb1ced30f93c32a,
+        66e6a90a5eb1ced30f93c31e
+      ],
+      "special_requests": "No peanuts",
+      "scheduled at": null
+    }
+    ```
   contact:
     name: Course Discord server
     url: https://discord.gg/dPsnz5u9
@@ -136,7 +164,7 @@ paths:
         - name: offset
           in: query
           description: |
-            Offest-based pagination filter for the number of results to skip before displaying resources.
+            Offset-based pagination filter for the number of results to skip before displaying resources.
           schema:
             type: integer
             example: 0
@@ -380,7 +408,7 @@ paths:
         - name: offset
           in: query
           description: |
-            Offest-based pagination filter for the number of results to skip before displaying resources.
+            Offset-based pagination filter for the number of results to skip before displaying resources.
           schema:
             type: integer
             example: 0
@@ -525,7 +553,7 @@ paths:
         - name: offset
           in: query
           description: |
-            Offest-based pagination filter for the number of results to skip before displaying resources.
+            Offset-based pagination filter for the number of results to skip before displaying resources.
           schema:
             type: integer
             example: 0
@@ -764,7 +792,7 @@ paths:
         - name: offset
           in: query
           description: |
-            Offest-based pagination filter for the number of results to skip before displaying resources.
+            Offset-based pagination filter for the number of results to skip before displaying resources.
           schema:
             type: integer
             example: 0
@@ -903,7 +931,7 @@ paths:
         - name: offset
           in: query
           description: |
-            Offest-based pagination filter for the number of results to skip before displaying resources.
+            Offset-based pagination filter for the number of results to skip before displaying resources.
           schema:
             type: integer
             example: 0
@@ -1158,7 +1186,7 @@ paths:
         - name: offset
           in: query
           description: |
-            Offest-based pagination filter for the number of results to skip before displaying resources.
+            Offset-based pagination filter for the number of results to skip before displaying resources.
           schema:
             type: integer
             example: 0

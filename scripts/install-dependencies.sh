@@ -43,3 +43,4 @@ install_dependencies() {
 # Install dependencies for code base directories
 install_dependencies "server"
 install_dependencies "admin"
+install_dependencies "openapi"
