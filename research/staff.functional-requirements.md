@@ -28,12 +28,12 @@
    - The system shall enable expeditors to set the status of an order to "In Progress."
    - This status update shall notify kitchen stations to begin preparation of the order.
 
-5. **Station Assignment**
+<!-- 5. **Station Assignment**
 
    5.1. **Assign Dishes to Stations**
 
    - The system shall allow expeditors to assign each dish in an order to a specific station (cold, hot, beverages).
-   - Assignments shall be visible to the relevant station chefs on the KDS.
+   - Assignments shall be visible to the relevant station chefs on the KDS. -->
 
 6. **Station View**
 
