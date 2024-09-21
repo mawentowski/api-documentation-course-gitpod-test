@@ -124,7 +124,7 @@ From the **App Store**, search for and download "Xcode". You'll need to be signe
      ssh-add ~/.ssh/id_GitHub_rsa
      ```
 
-   - Press `Ctrl + O` to save, then `Ctrl + X` to exit `nano`.
+   - Press `Ctrl + O` to save, press ENTER, then `Ctrl + X` to exit `nano`.
 
 4. **Verify SSH Agent:**
 
