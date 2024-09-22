@@ -52,7 +52,15 @@ If you are having an issue installing Xcode, post a question to the **SUPPORT - 
      ![](./images/xcode-install.png)
 
    - Hit ENTER to run the command.
-   - Follow the prompts to complete the installation.
+   - The following popup window should display:
+
+     ![](./images/xcode-tools-popup.jpeg)
+
+     Click **Install**. If it asks any questions, click Okay.
+
+     If you do not see it, try minimizing all of your applications.
+
+   - Back in Visual Studio Code, follow the prompts to complete the installation.
 
 3. **Verify Installation:**
 

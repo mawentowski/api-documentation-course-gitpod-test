@@ -232,9 +232,6 @@ const getDishIds = async () => {
 
     // Extract IDs into an array
     dishIds = dishes.map((dish) => dish._id);
-
-    // Log the IDs
-    console.log('Dish IDs:', dishIds);
   } catch (error) {
     console.error('Error retrieving dish IDs:', error);
   }
@@ -276,7 +273,6 @@ const getIngredientIds = async () => {
     ingredientIds = ingredients.map((ingredient) => ingredient._id);
 
     // Log the IDs
-    console.log('Ingredient IDs:', ingredientIds);
   } catch (error) {
     console.error('Error retrieving ingredient IDs:', error);
   }
@@ -343,9 +339,6 @@ const generateDishes = async () => {
       };
     });
 
-    // Verify dishes
-    console.log('Prepared dishes for insertion:', dishes);
-
     await DishModel.insertMany(dishes);
     console.log('Dishes seeded successfully');
   } catch (error) {
@@ -396,7 +389,6 @@ const generateOrders = async () => {
       });
     });
 
-    console.log('the orders are', orders);
     await OrderModel.insertMany(orders);
     console.log('Orders seeded successfully');
   } catch (error) {
@@ -418,9 +410,6 @@ const generateAuth = async () => {
 
     // Save the AuthModel instance to the database
     await auth.save();
-
-    // Log to verify creation
-    console.log('AuthModel created and saved:', auth);
 
     return auth;
   } catch (error) {
