@@ -10,6 +10,7 @@ const IngredientModel = mongoose.model(
 // const AuthModel = mongoose.model('Auth', require('./models/Auth').Auth);
 const UserModel = mongoose.model('User', require('./models/User').User);
 const DishModel = mongoose.model('Dish', require('./models/Dish').Dish);
+const AuthModel = mongoose.model('Auth', require('./models/Auth').Auth);
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -402,6 +403,30 @@ const generateOrders = async () => {
     console.error('Error seeding the database:', error);
   }
 };
+const generateAuth = async () => {
+  try {
+    await connectDB();
+    const auth = new AuthModel({
+      created_at: faker.date.past(),
+      updated_at: faker.date.recent(),
+      access_token: 'a1732455-42cf-4d24-a956-84adc847c0ca',
+      expires_at: '2034-09-18T09:54:52.897Z',
+      refresh_token: '68506407-e3de-4e4f-9051-f187adc99390',
+      token_type: 'Bearer',
+      user_name: 'SysAdminJoe$404',
+    });
+
+    // Save the AuthModel instance to the database
+    await auth.save();
+
+    // Log to verify creation
+    console.log('AuthModel created and saved:', auth);
+
+    return auth;
+  } catch (error) {
+    console.error('Could not create long-lasting Auth:', error);
+  }
+};
 
 const userNames = [
   'apiuser01',
@@ -482,6 +507,7 @@ const main = async () => {
     await generateDishes();
     await generateOrders();
     await generateUsers();
+    await generateAuth();
   } catch (error) {
     console.error('Error during operations:', error);
   } finally {

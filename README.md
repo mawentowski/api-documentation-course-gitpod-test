@@ -24,7 +24,6 @@ As we progress through the course, you'll interact with various parts of this re
   - [Running the Setup Script](#running-the-setup-script)
   - [Verifying Docker Containers](#verifying-docker-containers)
   - [Running Admin Panel](#running-admin-panel)
-  - [Generating Diagrams](#generating-diagrams)
   - [Pulling Changes](#pulling-changes)
   - [Soliciting Reviews](#soliciting-reviews)
   - [Postman Setup](#postman-setup)
@@ -33,7 +32,9 @@ As we progress through the course, you'll interact with various parts of this re
 
 ## System Privileges and Course Setup
 
-To fully participate in the course, it's essential that you have administrative privileges on the machine you’re using. These privileges allow you to install software, run scripts, execute commands, and set up development environments. Many work computers, especially those not configured for developers, restrict these capabilities. Therefore, it’s highly recommended to use a personal computer for the course to ensure you can complete all tasks without restrictions.
+A _personal computer_ is required to complete these setup instructions.
+
+To fully participate in the course, it's essential that you have administrative privileges on the machine you’re using. These privileges allow you to install software, run scripts, execute commands, and set up development environments. Many work computers, especially those not configured for developers, restrict these capabilities. Therefore, it’s highly recommended to use a _personal computer_ for the course to ensure you can complete all tasks without restrictions.
 
 If you only have access to a work computer while taking the course, send an email to [mark.wentowski@docsgeek.io](mailto:mark.wentowski@docsgeek.io) to discuss the available options.
 
@@ -49,9 +50,11 @@ Search for these software applications on Google and download them:
 - Google Chrome
 - Docker Desktop
 
-When prompted, create an account for each software.
+During a software installation, if you are prompted to create an account, do so. Ensure to provide a _personal email address_ when prompted to enter an email.
 
-If you are having trouble installing software, post to the channel dedicated to the software. For example, for Visual Studio Code issues, post to the **Support - Software** > [# visual-studio-code](https://discord.com/channels/1278288408795549716/1278305356530843698) channel.
+_After installing each software_, please CLOSE the software. The instructions will tell you should open a software.
+
+If you are having trouble installing software, complete the steps in [Join the Discord Server](#join-the-discord-server) first. In Discord, post to the **Support - Software** > [# general](https://discord.com/channels/1278288408795549716/1278300529734451274) channel, or post to the channel specific to the software (preferred).
 
 ## Join the Discord Server
 
@@ -103,26 +106,41 @@ Remember to follow the issue template in the [Getting Help](#getting-help) secti
 
 ## Cloning the Repository
 
-**Prerequisite:** Ensure you've set up SSH per the instructions in the [Windows](./docs/windows-setup.md) or [Mac](./docs/mac-setup.md) setup documentation. If you've already completed those steps, you can continue. Otherwise, please follow the setup instructions in the respective guide before moving forward.
+**Prerequisite:** Ensure you've completed the instructions in the [Windows](./docs/windows-setup.md) or [Mac](./docs/mac-setup.md) setup documentation. If you've already completed those steps, you can continue. Otherwise, please follow the setup instructions in the respective guide before moving forward.
 
 From this GitHub repository:
 
-1. Select the SSH option and copy the repository URL.
+1. Select the SSH option and copy the repository URL, as shown here:
+
+![](./docs/images/copy-repo-url.gif)
+
 2. Open Visual Studio Code (if not already open).
-3. Open a terminal. Do this by clicking **Terminal** at the top and selecting **New Terminal**.
-4. Clone the repository by typing the following command, replacing the URL with the one you copied:
+3. Refer to one of the following sets of instructions to open a terminal:
 
-```shell
-git clone git@github.com:gh-username/api-documentation-course.git
-```
+   **For Window users**:
 
-5. With a terminal open, change directories to the repo by running:
+   - Go to the top menu and click on **Terminal**.
+   - Select **New Terminal** from the dropdown.
+   - The next bullet applies to the video you see below.
+   - On the bottom right-side, click the downward arrow next to the `+` icon and select `Git Bash`. See the video below (instead of `bash`, it will say `Git Bash`!):
 
-```shell
-cd api-documentation-course
-```
+   **For Mac users**:
 
-If cloning failed, check the terminal for error messages. If it mentions access rights, ensure you properly set up SSH by revisiting the setup documentation for Windows or Mac. If you are struggling to resolve the issue, you can post to one of the following support channels depending on your OS:
+   - From the Mac **Menu Bar** at the top of the screen, open a new terminal window in VS Code by clicking **Terminal** > **New Terminal**
+
+4. Clone the repository:
+
+   - In Visual Studio code, click the **Explorer** icon.
+   - Click **Clone Repository**
+   - Paste the URL you copied previously from GitHub. Refer to the following video:
+
+     ![](./docs/images/clone-repo.gif)
+
+   - Click "Select as respostiory destination" to accept the default location.
+   - Wait until you see the "Would you like to open repository" popup.
+   - For the "Would you like to open repository" popup, click **Open**.
+
+If cloning failed, check the terminal for error messages. If it mentions access rights, ensure you properly set up SSH by revisiting the setup documentation for [Windows](./docs/windows-setup.md) or [Mac](./docs/mac-setup.md). If you are still to resolve the issue, you can post to one of the following support channels depending on your OS:
 
 - **Support - Windows** > [# git-gitbash](https://discord.com/channels/1278288408795549716/1278295713742061579)
 - **Support - Mac / Linux** > [# git](https://discord.com/channels/1278288408795549716/1278303208455798866)
@@ -146,7 +164,6 @@ api-documentation-course/
 ┣ .gitignore                  # Specifies files and directories to ignore in Git
 ┣ .prettierrc                 # Configuration file for Prettier code formatting
 ┣ README.md                   # Main setup instructions and links to specialized docs
-┣ docker-compose.admin.yml    # Docker Compose file for repository owner
 ┣ docker-compose.yml          # Docker Compose file for the main project setup
 ┣ package-lock.json           # Automatically generated file containing the exact version of dependencies
 ┣ package.json                # Lists project dependencies, scripts, and metadata
@@ -190,9 +207,9 @@ After running `setup.sh`, open Docker Desktop (if not already open) and navigate
 - Ensure each sub-container shows "Running" status.
 - Check that each port in the Port(s) column is a clickable URL. If any port isn't clickable or any container isn't running, reach out on Discord for help.
 
-If either two of the approve conditions are not met, please post your issue (using the template) to the [# docker](https://discord.com/channels/1278288408795549716/1278304522522988649) Discord channel.
+If all containers are running, and the ports are clickable, you're good to go! So the instructor can verify Docker is configured properly, take a screenshot. In a future step, you'll post it to Discord (more on that later).
 
-If all containers are running and the ports are clickable, you're good to go!
+If either two of the approve conditions are not met, please post your issue (using the template) to the [# docker](https://discord.com/channels/1278288408795549716/1278304522522988649) Discord channel.
 
 ## Running Admin Panel
 
@@ -208,23 +225,9 @@ The Admin panel is a frontend CRUD (Create-Read-Update-Delete) application that 
 
 3. If the script runs successfully, a link to the Admin panel will be displayed. Click the link or visit [http://localhost:5173/](http://localhost:5173/) to view the admin panel in your browser.
 
+So the instructor can verify Docker is configured properly, take a screenshot of the Login screen (or any screen). In a future step, you'll post it to Discord (more on that later).
+
 When you're finished viewing the admin panel, stop the server by pressing `Ctrl + C` in the same terminal where you ran the script.
-
-Here's a revised version with improved clarity and detail:
-
-## Generating Diagrams
-
-The `research` folder contains source files for your documentation, including Mermaid diagram files (`.mmd`). These files can be converted into `.png` images for easy insertion into your documentation.
-
-1. Open a new terminal in VS Code. If you're on Windows, use Git Bash for compatibility.
-
-2. Run the following command to execute the diagram generation script:
-
-   ```shell
-   ./scripts/generate-diagrams.sh
-   ```
-
-3. Upon successful execution, the script will convert each `.mmd` file into a `.png` file, ready for use in your documentation.
 
 ## Pulling Changes
 

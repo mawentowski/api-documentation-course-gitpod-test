@@ -21,8 +21,9 @@ To import Postman collections and environment variables from the `postman` direc
    ```shell
    api-documentation-course/
    ┣ postman/                       # Select this folder
-   ┃ ┣ environment-variables.json
-   ┃ ┗ postman-collection.json
+   ┃ ┣ Environment Variables.postman_environment.json
+   ┃ ┣ Point of Service (POS) API - Original.postman_collection.json
+   ┃ ┗ Point of Service (POS) API.postman_collection.json
    ```
 
    - Postman should display two files for import. Click **Import** to import both files.
