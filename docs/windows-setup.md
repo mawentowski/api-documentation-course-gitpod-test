@@ -31,12 +31,14 @@ This guide walks you through setting a development environment on Windows.
 
 3. **Follow the Installation Wizard:**
 
-   The following list highlights only the essential steps of the installation process, rather than including every detail:
+   Read the following before continuing:
 
-   - Click "Next" to proceed with the default options.
-   - Choose the default installation location.
-   - Select “Git Bash Here”.
-   - Ensure that the option to "Use Git from the Windows Command Prompt" is selected.
+   - For the most part, accept all default options suggested.
+   - For the **Select Components** screen, ensure the following components are selected:
+
+     ![](./images/git-select-components.png)
+
+   - Click "Install" and then “Finish” once the installation is complete.
 
 4. **Complete the Installation:**
 
@@ -232,12 +234,12 @@ username@IN-username-W2 MINGW64 ~
 
 3. **Follow the Installation Wizard:**
 
-   Note: The following list highlights only the essential steps of the installation process, rather than including every detail.
+   Read the following before continuing:
 
-   - Click "Next" to proceed with the default options.
-   - Choose the default installation location. Make a note of the default installation location (e.g., `C:\Program Files\nodejs)`)
+   - For the most part, accept all default options suggested.
+   - Make a note of the default installation location (e.g., `C:\Program Files\nodejs)`). This will be used in a future step.
    - Ensure that the option to install npm (Node Package Manager) is selected.
-   - For the "Tools for Native Modules" screen, simply click Next without ticking the checkbox.
+   - _If you encounter_ a "Tools for Native Modules" screen, simply click "Next" without ticking the checkbox.
    - Click “Install” and then “Finish” once the installation is complete.
 
 ## 8. Add Node.js to Your PATH
