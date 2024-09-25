@@ -211,7 +211,7 @@ If you are having an issue installing Xcode, post a question to the **SUPPORT - 
    - In your open terminal, type the following command and hit Enter:
 
      ```shell
-     source ~/.bash_profile
+     source ~/.zshrc
      ```
 
    - Run the following command to check if the SSH agent is running and if your SSH key is added:
