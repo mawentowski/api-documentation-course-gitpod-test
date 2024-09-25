@@ -115,7 +115,24 @@ From this GitHub repository:
 ![](./docs/images/copy-repo-url.gif)
 
 2. Open Visual Studio Code (if not already open).
-3. Refer to one of the following sets of instructions to open a terminal:
+
+3a. Clone the repository using the UI:
+
+   - In Visual Studio code, click the **Explorer** icon.
+   - Click **Clone Repository**
+   - Paste the URL you copied previously from GitHub. Refer to the following video:
+
+     ![](./docs/images/clone-repo.gif)
+
+   - Click "Select as respostiory destination" to accept the default location.
+   - Wait until you see the "Would you like to open repository" popup.
+   - For the "Would you like to open repository" popup, click **Open**.
+
+If this process did not work, refer to step 3a. Otherwise, skip 3a.
+
+3b. Clone the repository using the terminal:
+
+Refer to one of the following sets of instructions to open a terminal:
 
    **For Window users**:
 
@@ -127,18 +144,6 @@ From this GitHub repository:
    **For Mac users**:
 
    - From the Mac **Menu Bar** at the top of the screen, open a new terminal window in VS Code by clicking **Terminal** > **New Terminal**
-
-4. Clone the repository:
-
-   - In Visual Studio code, click the **Explorer** icon.
-   - Click **Clone Repository**
-   - Paste the URL you copied previously from GitHub. Refer to the following video:
-
-     ![](./docs/images/clone-repo.gif)
-
-   - Click "Select as respostiory destination" to accept the default location.
-   - Wait until you see the "Would you like to open repository" popup.
-   - For the "Would you like to open repository" popup, click **Open**.
 
 If cloning failed, check the terminal for error messages. If it mentions access rights, ensure you properly set up SSH by revisiting the setup documentation for [Windows](./docs/windows-setup.md) or [Mac](./docs/mac-setup.md). If you are still to resolve the issue, you can post to one of the following support channels depending on your OS:
 
