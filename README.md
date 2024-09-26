@@ -110,13 +110,13 @@ Remember to follow the issue template in the [Getting Help](#getting-help) secti
 
 From this GitHub repository:
 
-1. Select the SSH option and copy the repository URL, as shown here:
+1. Click the green **<> Code** button.
+2. Ensure you on the **Local** tab, as well as the **HTTPS** tab (default).
+3. On the HTTPS tab, click the copy button to copy the repository URL.
 
-![](./docs/images/copy-repo-url.gif)
+4. Open Visual Studio Code (if not already open).
 
-2. Open Visual Studio Code (if not already open).
-
-3a. Clone the repository using the UI:
+5. Clone the repository using the UI:
 
    - In Visual Studio code, click the **Explorer** icon.
    - Click **Clone Repository**
@@ -127,23 +127,6 @@ From this GitHub repository:
    - Click "Select as respostiory destination" to accept the default location.
    - Wait until you see the "Would you like to open repository" popup.
    - For the "Would you like to open repository" popup, click **Open**.
-
-If this process did not work, refer to step 3a. Otherwise, skip 3a.
-
-3b. Clone the repository using the terminal:
-
-Refer to one of the following sets of instructions to open a terminal:
-
-   **For Window users**:
-
-   - Go to the top menu and click on **Terminal**.
-   - Select **New Terminal** from the dropdown.
-   - The next bullet applies to the video you see below.
-   - On the bottom right-side, click the downward arrow next to the `+` icon and select `Git Bash`. See the video below (instead of `bash`, it will say `Git Bash`!):
-
-   **For Mac users**:
-
-   - From the Mac **Menu Bar** at the top of the screen, open a new terminal window in VS Code by clicking **Terminal** > **New Terminal**
 
 If cloning failed, check the terminal for error messages. If it mentions access rights, ensure you properly set up SSH by revisiting the setup documentation for [Windows](./docs/windows-setup.md) or [Mac](./docs/mac-setup.md). If you are still to resolve the issue, you can post to one of the following support channels depending on your OS:
 
