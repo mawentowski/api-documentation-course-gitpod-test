@@ -146,14 +146,12 @@ api-documentation-course/
 ┣ docs/                       # Documentation specific to setting up the repository
 ┣ openapi/                    # Source OpenAPI specifications and design artifacts
 ┣ postman/                    # Postman collection and environment files for API testing
-┣ research/                   # Research artifacts and diagrams
 ┣ scripts/                    # Scripts used for setup automation and other tasks
 ┣ server/                     # API implementation (backend server)
 ┣ .gitignore                  # Specifies files and directories to ignore in Git
 ┣ .prettierrc                 # Configuration file for Prettier code formatting
 ┣ README.md                   # Main setup instructions and links to specialized docs
 ┣ docker-compose.yml          # Docker Compose file for the main project setup
-┣ package-lock.json           # Automatically generated file containing the exact version of dependencies
 ┣ package.json                # Lists project dependencies, scripts, and metadata
 ┗ setup.sh                    # Script to automate repository setup and initial configuration
 ```
