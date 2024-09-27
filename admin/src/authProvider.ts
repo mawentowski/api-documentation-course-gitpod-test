@@ -13,7 +13,7 @@ export const authProvider = {
     try {
       const basicAuth = btoa(`${clientId}:${clientSecret}`);
       const response = await axios.post(
-        "http://localhost:8080/auth/token",
+        "http://localhost:80/auth/token",
         {
           grant_type: "password",
           user_name: username,
@@ -77,7 +77,7 @@ export const authProvider = {
             }
 
             const response = await axios.post(
-              "http://localhost:8080/auth/refresh-token",
+              "http://localhost:80/auth/refresh-token",
               {
                 refresh_token: refreshToken,
               },
