@@ -73,7 +73,7 @@ See the video below for reference:
 
 You’ll be added to the course Discord channel where you can get support and ask questions as you set up your environment.
 
-Head to the [#welcome](https://discord.com/channels/1278288408795549716/1278583957600079924) channel and introduce yourself!
+Within the **General** category, open the channel dedicated to your course schedule and introduce yourself.
 
 If you encounter any issues, please email [mark.wentowski@docsgeek.io](mailto:mark.wentowski@docsgeek.io).
 
