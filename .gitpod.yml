@@ -7,11 +7,8 @@ tasks:
     init: |
       cd server
       npm install
-    command: npm run start
-  - name: Seed database
-    command: |
-      cd server
       node seed-db.js
+    command: npm run start
 ports:
   - name: back-end
     port: 8080
