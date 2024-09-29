@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const oas3Tools = require('oas3-tools');
 const cors = require('cors'); // Import the cors middleware
 
-const databaseUrl = 'http://localhost:27017'; // Using the service name
+const databaseUrl = 'mongodb://localhost:27017'; // Using the service name
 
 // Connect to MongoDB
 mongoose
