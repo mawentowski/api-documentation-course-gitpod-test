@@ -4,10 +4,10 @@ tasks:
   - name: Run database
     command: mongod
   - name: Run back-end
-    command: |
+    init: |
       cd server
       npm install
-      npm run start
+    command: npm run start
   - name: Seed database
     command: |
       cd server
