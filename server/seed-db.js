@@ -16,7 +16,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/pos-db');
+    await mongoose.connect('mongodb://localhost:27017');
     console.log('MongoDB connected');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
