@@ -1,4 +1,4 @@
-image: mongo:latest
+image: gitpod/workspace-mongodb
 
 tasks:
   - name: run back-end
