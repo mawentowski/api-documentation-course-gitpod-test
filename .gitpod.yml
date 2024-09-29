@@ -10,6 +10,4 @@ ports:
   - name: back-end
     port: 8080
     onOpen: ignore
-  - name: database
-    port: 27017
-    onOpen: ignore
+    visibility: public
