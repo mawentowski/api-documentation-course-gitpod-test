@@ -1,11 +1,17 @@
 image: gitpod/workspace-mongodb
 
 tasks:
-  - name: run back-end
+  - name: Run database
+    command: mongod
+  - name: Run back-end
     command: |
       cd server
       npm install
       npm run start
+  - name: Seed database
+    command: |
+      cd server
+      node seed-db.js
 ports:
   - name: back-end
     port: 8080
