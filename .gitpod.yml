@@ -7,8 +7,9 @@ tasks:
     init: |
       cd server
       npm install
+    command: |
       node seed-db.js
-    command: npm run start
+      node index.js
 ports:
   - name: back-end
     port: 8080
