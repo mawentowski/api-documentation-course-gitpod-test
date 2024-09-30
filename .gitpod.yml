@@ -8,8 +8,9 @@ tasks:
       cd server
       npm install
     command: |
-      node ./server/seed-db.js
-      node ./server/index.js
+      cd server
+      node seed-db.js
+      node index.js
   - name: Run React admin panel
     init: |
       cd admin
