@@ -24,11 +24,13 @@ tasks:
       npm install
     command: |
       cd openapi
-      if [ -f openapi.yml ]; then
+      if [ ! -f openapi.yml ]; then
+        echo "openapi.yml does not exist. Running wipeOpenApiDescription.js..."
+        node wipeOpenApiDescription.js
+      else
         echo "openapi.yml already exists. Exiting script."
         exit 0
       fi
-      node wipeOpenApiDescription.js
 ports:
   - name: Node.js server
     port: 8080
