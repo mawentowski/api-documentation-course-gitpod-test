@@ -9,14 +9,14 @@ tasks:
       npm install
     command: |
       cd server
-      node seed-db.js
-      node index.js
+      node seed-db-gitpod.js
+      node index-gitpod.js
   - name: Run React admin panel
     init: |
-      cd admin
+      cd admin-gitpod
       npm install
     command: |
-      cd admin
+      cd admin-gitpod
       npm run dev
   - name: Set up OpenAPI folder
     init: |
