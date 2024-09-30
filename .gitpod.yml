@@ -25,7 +25,8 @@ tasks:
     command: |
       cd openapi
       if [ ! -f openapi.yml ]; then
-        echo "openapi.yml does not exist. Running wipeOpenApiDescription.js..."
+        echo "openapi.yml does not exist. Creating a copy from openapi.original.yml..."
+        cp openapi.original.yml openapi.yml || { echo "Failed to copy openapi.original.yml"; exit 1; }
         node wipeOpenApiDescription.js
       else
         echo "openapi.yml already exists. Exiting script."
