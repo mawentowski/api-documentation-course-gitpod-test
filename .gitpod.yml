@@ -1,17 +1,41 @@
 image: gitpod/workspace-mongodb
 
 tasks:
-  - name: Run database
+  - name: Run MongoDB database
     command: mongod
-  - name: Run back-end
+  - name: Run Node.js server
     init: |
       cd server
       npm install
     command: |
-      node seed-db.js
-      node index.js
+      node ./server/seed-db.js
+      node ./server/index.js
+  - name: Run React admin panel
+    init: |
+      cd admin
+      npm install
+    command: |
+      cd admin
+      npm run dev
+  - name: Set up OpenAPI folder
+    init: |
+      cd openapi
+      npm install
+    command: |
+      cd openapi
+      if [ -f openapi.yml ]; then
+        echo "openapi.yml already exists. Exiting script."
+        exit 0
+      fi
+      node wipeOpenApiDescription.js
 ports:
-  - name: back-end
+  - name: Node.js server
     port: 8080
+    # swagger ui docs tied to server:
+    # http://localhost:8080/docs
     onOpen: ignore
+    visibility: public
+  - name: React admin panel
+    port: 5173
+    onOpen: open-preview
     visibility: public
