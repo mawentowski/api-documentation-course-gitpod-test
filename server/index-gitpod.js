@@ -21,8 +21,15 @@ mongoose
 // Initialize Express application
 const app = express();
 
-// Enable CORS for all routes
-app.use(cors()); // Apply the cors middleware
+// Replace this with the origin(s) you want to allow
+const allowedOrigins = ['http://localhost:5173']; // Your React app's URL
+
+app.use(
+  cors({
+    origin: allowedOrigins, // Specify allowed origins
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  })
+);
 
 // Middleware for parsing URL-encoded and JSON bodies
 app.use(express.urlencoded({ extended: true }));

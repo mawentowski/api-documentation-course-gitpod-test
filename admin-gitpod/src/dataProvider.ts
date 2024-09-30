@@ -10,12 +10,20 @@ const httpClient = (url: string, options: any = {}) => {
   const headers = new Headers({
     "Content-Type": "application/json",
     Accept: "application/json",
-    ...(["POST", "PUT", "DELETE"].includes(options.method) &&
-      token && { Authorization: `Bearer ${token}` }), // Add Authorization header if required
+    ...(["POST", "PUT", "DELETE"].includes(options.method) && token && { Authorization: `Bearer ${token}` }), // Add Authorization header if required
     ...options.headers, // Spread in any additional headers
   });
 
-  return fetchUtils.fetchJson(url, { ...options, headers });
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: "include", // This will include cookies in the request
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    return response.json();
+  });
 };
 
 export const dataProvider: DataProvider = {
