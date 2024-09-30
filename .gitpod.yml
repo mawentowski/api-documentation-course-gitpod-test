@@ -1,7 +1,7 @@
 image: gitpod/workspace-mongodb
 
 tasks:
-  - name: Run MongoDB database
+  - name: MongoDB
     command: mongod
   - name: Run Node.js server
     init: |
@@ -11,14 +11,14 @@ tasks:
       cd server
       node seed-db-gitpod.js
       node index-gitpod.js
-  - name: Run React admin panel
+  - name: React admin panel
     init: |
       cd admin-gitpod
       npm install
     command: |
       cd admin-gitpod
       npm run dev
-  - name: Set up OpenAPI folder
+  - name: OpenAPI folder
     init: |
       cd openapi
       npm install
@@ -41,5 +41,5 @@ ports:
     visibility: public
   - name: React admin panel
     port: 5173
-    onOpen: open-preview
+    onOpen: open-browser
     visibility: public
