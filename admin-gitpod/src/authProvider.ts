@@ -25,6 +25,7 @@ export const authProvider = {
             Accept: "application/json",
             Authorization: `Basic ${basicAuth}`,
           },
+          withCredentials: true, // Include credentials with the request
         },
       );
 
@@ -36,6 +37,18 @@ export const authProvider = {
       return Promise.resolve();
     } catch (error) {
       console.error("Login failed", error);
+      // Handle CORS errors specifically
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("Request data:", error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error("Error message:", error.message);
+      }
       return Promise.reject();
     }
   },
