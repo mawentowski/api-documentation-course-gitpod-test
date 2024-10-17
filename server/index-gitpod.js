@@ -22,11 +22,18 @@ mongoose
 const app = express();
 
 // Replace this with the origin(s) you want to allow
-const allowedOrigins = ['http://localhost:5173']; // Your React app's URL
+const allowedOriginPattern =
+  /^https:\/\/\d{4,5}-[\w-]+\.ws-us\d{2,3}\.gitpod\.io$/;
 
 app.use(
   cors({
-    origin: allowedOrigins, // Specify allowed origins
+    origin: (origin, callback) => {
+      if (!origin || allowedOriginPattern.test(origin)) {
+        callback(null, true); // Allow requests with matching origin or no origin (e.g. server-to-server requests)
+      } else {
+        callback(new Error('Not allowed by CORS')); // Reject the request if the origin does not match
+      }
+    },
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
   })
 );
