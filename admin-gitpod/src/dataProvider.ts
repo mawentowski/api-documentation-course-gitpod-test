@@ -1,7 +1,7 @@
 import { DataProvider, fetchUtils } from "react-admin";
 import { stringify } from "query-string";
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = process.env.SERVER_URL || "http://localhost:8080";
 
 const httpClient = (url: string, options: any = {}) => {
   const token = localStorage.getItem("access_token");

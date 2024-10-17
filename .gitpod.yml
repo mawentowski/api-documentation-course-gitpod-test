@@ -11,6 +11,8 @@ tasks:
       cd server
       node seed-db-gitpod.js
       node index-gitpod.js
+    env:
+      SERVER_URL: https://${GITPOD_WORKSPACE_URL:4}.ws-us116.gitpod.io
   - name: React admin panel
     init: |
       cd admin-gitpod

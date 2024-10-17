@@ -5,6 +5,8 @@ interface LoginParams {
   password: string;
 }
 
+// Use environment variables to dynamically set the base URL
+const API_BASE_URL = process.env.SERVER_URL || "http://localhost:8080";
 const clientId = "admin_web_app";
 const clientSecret = "a5d7f23e-8b64-4b4c-9b11-21c5cfdf25f1";
 
@@ -13,7 +15,7 @@ export const authProvider = {
     try {
       const basicAuth = btoa(`${clientId}:${clientSecret}`);
       const response = await axios.post(
-        "http://localhost:8080/auth/token",
+        `${API_BASE_URL}/auth/token`,
         {
           grant_type: "password",
           user_name: username,
@@ -37,16 +39,12 @@ export const authProvider = {
       return Promise.resolve();
     } catch (error) {
       console.error("Login failed", error);
-      // Handle CORS errors specifically
       if (error.response) {
-        // The request was made and the server responded with a status code
         console.error("Response data:", error.response.data);
         console.error("Response status:", error.response.status);
       } else if (error.request) {
-        // The request was made but no response was received
         console.error("Request data:", error.request);
       } else {
-        // Something happened in setting up the request that triggered an Error
         console.error("Error message:", error.message);
       }
       return Promise.reject();
@@ -67,10 +65,6 @@ export const authProvider = {
     const expiresAt = localStorage.getItem("expires_at");
     const refreshToken = localStorage.getItem("refresh_token");
 
-    console.log("the current access token is:", accessToken);
-    console.log("the current expires data is:", expiresAt);
-    console.log("the current refresh token is:", refreshToken);
-
     if (!accessToken) {
       return Promise.reject(); // No access token means the user needs to log in
     }
@@ -90,10 +84,8 @@ export const authProvider = {
             }
 
             const response = await axios.post(
-              "http://localhost:8080/auth/refresh-token",
-              {
-                refresh_token: refreshToken,
-              },
+              `${API_BASE_URL}/auth/refresh-token`,
+              { refresh_token: refreshToken },
               {
                 headers: {
                   "Content-Type": "application/json",
@@ -104,10 +96,6 @@ export const authProvider = {
 
             const { access_token, expires_at, refresh_token } = response.data;
 
-            console.log("the refreshed access token is:", access_token);
-            console.log("the refreshed expires data is:", expires_at);
-            console.log("the new refresh token is:", refresh_token);
-
             localStorage.setItem("access_token", access_token);
             localStorage.setItem("expires_at", expires_at);
             localStorage.setItem("refresh_token", refresh_token);
@@ -116,17 +104,11 @@ export const authProvider = {
             return Promise.reject();
           } finally {
             isRefreshingToken = false;
-            refreshTokenPromise = null;
           }
         })();
       }
 
-      // Wait for the refresh token promise to resolve before proceeding
-      if (refreshTokenPromise) {
-        await refreshTokenPromise;
-      }
-
-      return Promise.resolve();
+      await refreshTokenPromise;
     }
 
     return Promise.resolve();
