@@ -10,10 +10,10 @@ tasks:
       npm install
     command: |
       region=$(echo ${GITPOD_WORKSPACE_URL} | cut -d'.' -f2)
-      echo "REACT_APP_SERVER_URL=https://8080-${GITPOD_WORKSPACE_ID}.${region}.gitpod.io" > ../admin-gitpod/.env
+      echo "VITE_REACT_APP_SERVER_URL=https://8080-${GITPOD_WORKSPACE_ID}.${region}.gitpod.io" > ../admin-gitpod/.env
       node seed-db-gitpod.js
       node index-gitpod.js
-  - name: React admin panel
+  - name: React admin panel 
     init: |
       cd admin-gitpod
       npm install

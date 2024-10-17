@@ -1,7 +1,8 @@
 import { DataProvider, fetchUtils } from "react-admin";
 import { stringify } from "query-string";
 
-const apiUrl = process.env.REACT_APP_SERVER_URL || "http://localhost:8080";
+const apiUrl =
+  import.meta.env.VITE_REACT_APP_SERVER_URL || "http://localhost:8080";
 console.log("API Base URL in dataProvider is:", apiUrl);
 
 const httpClient = (url: string, options: any = {}) => {
