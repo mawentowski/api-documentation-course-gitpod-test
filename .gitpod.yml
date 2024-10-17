@@ -1,3 +1,5 @@
+image: gitpod/workspace-mongodb
+
 tasks:
   - name: MongoDB
     command: mongod
@@ -7,8 +9,7 @@ tasks:
       cd server
       npm install
     command: |
-      echo "REACT_APP_SERVER_URL=https://${GITPOD_WORKSPACE_URL:4}.ws-us116.gitpod.io" > .env
-      sleep 5
+      echo "REACT_APP_SERVER_URL=https://8080-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_URL:4}" > .env
       node seed-db-gitpod.js
       node index-gitpod.js
   - name: React admin panel
