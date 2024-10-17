@@ -7,8 +7,6 @@ tasks:
       cd server
       npm install
     command: |
-      cd server
-      # Set the environment variable for the React app
       echo "REACT_APP_SERVER_URL=https://${GITPOD_WORKSPACE_URL:4}.ws-us116.gitpod.io" > .env
       node seed-db-gitpod.js
       node index-gitpod.js
