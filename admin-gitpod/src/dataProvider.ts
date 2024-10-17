@@ -1,7 +1,8 @@
 import { DataProvider, fetchUtils } from "react-admin";
 import { stringify } from "query-string";
 
-const apiUrl = process.env.SERVER_URL || "http://localhost:8080";
+const apiUrl = process.env.REACT_APP_SERVER_URL || "http://localhost:8080";
+console.log("API Base URL in dataProvider is:", apiUrl);
 
 const httpClient = (url: string, options: any = {}) => {
   const token = localStorage.getItem("access_token");
@@ -10,7 +11,8 @@ const httpClient = (url: string, options: any = {}) => {
   const headers = new Headers({
     "Content-Type": "application/json",
     Accept: "application/json",
-    ...(["POST", "PUT", "DELETE"].includes(options.method) && token && { Authorization: `Bearer ${token}` }), // Add Authorization header if required
+    ...(["POST", "PUT", "DELETE"].includes(options.method) &&
+      token && { Authorization: `Bearer ${token}` }), // Add Authorization header if required
     ...options.headers, // Spread in any additional headers
   });
 
@@ -18,7 +20,7 @@ const httpClient = (url: string, options: any = {}) => {
     ...options,
     headers,
     credentials: "include", // This will include cookies in the request
-  }).then(response => {
+  }).then((response) => {
     if (!response.ok) {
       throw new Error(response.statusText);
     }

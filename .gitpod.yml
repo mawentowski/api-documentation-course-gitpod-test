@@ -1,18 +1,17 @@
-image: gitpod/workspace-mongodb
-
 tasks:
   - name: MongoDB
     command: mongod
+
   - name: Run Node.js server
     init: |
       cd server
       npm install
     command: |
       cd server
+      # Set the environment variable for the React app
+      echo "REACT_APP_SERVER_URL=https://${GITPOD_WORKSPACE_URL:4}.ws-us116.gitpod.io" > .env
       node seed-db-gitpod.js
       node index-gitpod.js
-    env:
-      SERVER_URL: https://${GITPOD_WORKSPACE_URL:4}.ws-us116.gitpod.io
   - name: React admin panel
     init: |
       cd admin-gitpod
@@ -20,6 +19,7 @@ tasks:
     command: |
       cd admin-gitpod
       npm run dev
+
   - name: OpenAPI folder
     init: |
       cd openapi
@@ -34,6 +34,7 @@ tasks:
         echo "openapi.yml already exists. Exiting script."
         exit 0
       fi
+
 ports:
   - name: Node.js server
     port: 8080
@@ -41,6 +42,7 @@ ports:
     # http://localhost:8080/docs
     onOpen: ignore
     visibility: public
+
   - name: React admin panel
     port: 5173
     onOpen: open-browser

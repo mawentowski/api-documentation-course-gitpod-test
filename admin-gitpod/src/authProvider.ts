@@ -6,7 +6,8 @@ interface LoginParams {
 }
 
 // Use environment variables to dynamically set the base URL
-const API_BASE_URL = process.env.SERVER_URL || "http://localhost:8080";
+const API_BASE_URL = process.env.REACT_APP_SERVER_URL || "http://localhost:8080";
+console.log("API Base URL in authProvider is:", API_BASE_URL);
 const clientId = "admin_web_app";
 const clientSecret = "a5d7f23e-8b64-4b4c-9b11-21c5cfdf25f1";
 
