@@ -9,7 +9,7 @@ tasks:
       cd server
       npm install
     command: |
-      echo "REACT_APP_SERVER_URL=https://8080-${GITPOD_WORKSPACE_ID}.ws-us116.gitpod.io" > .env
+      echo "REACT_APP_SERVER_URL=https://8080-${GITPOD_WORKSPACE_ID}.${region}.gitpod.io" > ../admin/.env
       node seed-db-gitpod.js
       node index-gitpod.js
   - name: React admin panel
